@@ -24,11 +24,11 @@ class MyRobot(wpilib.IterativeRobot):
         elif self.pistonDown.get():
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
             self.motorWhere = True
-        self.total = (self.joystick.getRawAxis(3)*.75)+.25
+        self.total = -1*((self.joystick.getRawAxis(3)*.75)+.25)
         if self.motorWhere==False: 
             self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX())
         elif self.motorWhere==True:
-            self.robodrive.mecanumDrive_Cartesian(self.joystick.getX(), self.joystick.getY(), self.joystick.getRawAxis(4), 0)
+            self.robodrive.mecanumDrive_Cartesian((-1*self.joystick.getX()), (-1*self.joystick.getY()), self.joystick.getRawAxis(4), 0)
             
 
 
