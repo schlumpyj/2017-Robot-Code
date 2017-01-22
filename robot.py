@@ -30,7 +30,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 1) #Will be left bumper
         self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 2) #Will be right bumper
         self.keepStraight = wpilib.buttons.JoystickButton(self.joystick, 3)
-        self.tempZero = wpilib.buttons.JoystickButton(self.joystick, 4)
         
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
         
@@ -39,6 +38,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.motorWhere = True #IF IT IS IN MECANUM BY DEFAULT
         self.rotationXbox = 0
         self.rotationPID = 0
+        self.firstTime = True
         
         """
         PIDs
@@ -65,13 +65,14 @@ class MyRobot(wpilib.IterativeRobot):
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
             self.motorWhere = True
         
-        if self.tempZero.get():
+        if self.keepStraight.get() and self.firstTime:
             self.turnController.setSetpoint(self.navx.getYaw())
-        
-        if self.keepStraight.get():
+            self.firstTime = False
+        elif self.keepStraight.get() and not self.firstTime:
             self.turnController.enable()
             self.rotationXbox = self.rotationPID
         else:
+            self.firstTime = True
             self.turnController.disable()
             self.rotationXbox = self.joystick.getRawAxis(4) #Dead zone that the Xbox controller has
             if self.rotationXbox < .15 and self.rotationXbox > -.15:
