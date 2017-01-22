@@ -2,6 +2,7 @@
 import wpilib
 import ctre
 import wpilib.buttons
+from robotpy_ext.common_drivers import units, navx
 from networktables import NetworkTable
 import networktables
 
@@ -9,17 +10,27 @@ class MyRobot(wpilib.IterativeRobot):
 
     def robotInit(self):
         """
-        Set up code
+        Motors
         """
         self.motor1 = ctre.CANTalon(1) #Drive Motors
         self.motor2 = ctre.CANTalon(2) 
         self.motor3 = ctre.CANTalon(3)
         self.motor4 = ctre.CANTalon(4)
         
+        """
+        Sensors
+        """
+        self.navx = navx.AHRS.create_spi()
+        
         self.joystick = wpilib.Joystick(0)#Should be xbox controller
         
+        """
+        Buttons
+        """
         self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 1) #Will be left bumper
         self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 2) #Will be right bumper
+        self.keepStraight = wpilib.buttons.JoystickButton(self.joystick, 3)
+        self.tempZero = wpilib.buttons.JoystickButton(self.joystick, 4)
         
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
         
@@ -27,6 +38,21 @@ class MyRobot(wpilib.IterativeRobot):
         
         self.motorWhere = True #IF IT IS IN MECANUM BY DEFAULT
         self.rotationXbox = 0
+        self.rotationPID = 0
+        
+        """
+        PIDs
+        """
+        kP = 0.3
+        kI = 0.00
+        kD = 0.00
+        kF = 0.00
+        turnController = wpilib.PIDController(kP, kI, kD, kF, self.navx, output=self)
+        turnController.setInputRange(-180.0,  180.0)
+        turnController.setOutputRange(-.5, .5)
+        turnController.setContinuous(True)
+        self.turnController = turnController
+        
     def teleopPeriodic(self):
         """
             Human controlled period
@@ -39,9 +65,17 @@ class MyRobot(wpilib.IterativeRobot):
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
             self.motorWhere = True
         
-        self.rotationXbox = self.joystick.getRawAxis(4) #Dead zone that the Xbox controller has
-        if self.rotationXbox < .15 and self.rotationXbox > -.15:
-            self.rotationXbox=0
+        if self.tempZero.get():
+            self.turnController.setSetpoint(self.navx.getYaw())
+        
+        if self.keepStraight.get():
+            self.turnController.enable()
+            self.rotationXbox = self.rotationPID
+        else:
+            self.turnController.disable()
+            self.rotationXbox = self.joystick.getRawAxis(4) #Dead zone that the Xbox controller has
+            if self.rotationXbox < .15 and self.rotationXbox > -.15:
+                self.rotationXbox=0
        
         
         self.total = -1*((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
@@ -52,6 +86,9 @@ class MyRobot(wpilib.IterativeRobot):
             self.robodrive.mecanumDrive_Cartesian((-1*self.joystick.getX()), (-1*self.joystick.getY()), self.rotationXbox, 0)
             
 
+    def pidWrite(self, output):
 
+        self.rotationPID = output
+        
 if __name__=="__main__":
     wpilib.run(MyRobot)
