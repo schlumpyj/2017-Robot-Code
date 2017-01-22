@@ -26,7 +26,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor2, self.motor3) 
         
         self.motorWhere = True #IF IT IS IN MECANUM BY DEFAULT
-    
+        self.rotationXbox = 0
     def teleopPeriodic(self):
         """
             Human controlled period
@@ -39,15 +39,19 @@ class MyRobot(wpilib.IterativeRobot):
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
             self.motorWhere = True
         
+        self.rotationXbox = self.joystick.getRawAxis(4) #Dead zone that the Xbox controller has
+        if self.rotationXbox < .15 and self.rotationXbox > -.15:
+            self.rotationXbox=0
+       
+        
         self.total = -1*((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
         
         if self.motorWhere==False: 
             self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX())
         elif self.motorWhere==True:
-            self.robodrive.mecanumDrive_Cartesian((-1*self.joystick.getX()), (-1*self.joystick.getY()), self.joystick.getRawAxis(4), 0)
+            self.robodrive.mecanumDrive_Cartesian((-1*self.joystick.getX()), (-1*self.joystick.getY()), self.rotationXbox, 0)
             
 
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
-
