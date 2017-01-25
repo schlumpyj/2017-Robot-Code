@@ -43,7 +43,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         PIDs
         """
-        kP = 0.03
+        kP = 0.01
         kI = 0.00
         kD = 0.00
         kF = 0.00
@@ -52,7 +52,15 @@ class MyRobot(wpilib.IterativeRobot):
         turnController.setOutputRange(-.5, .5)
         turnController.setContinuous(True)
         self.turnController = turnController
-        
+    def teleopInit(self):
+        print ("hello")
+        state = self.drivePiston.get()
+        if state == wpilib.DoubleSolenoid.Value.kForward:
+            self.motorWhere=True
+        elif state == wpilib.DoubleSolenoid.Value.kReverse:
+            self.motorWhere=False
+        else:
+            print ("Nope")
     def teleopPeriodic(self):
         """
             Human controlled period
@@ -70,25 +78,22 @@ class MyRobot(wpilib.IterativeRobot):
             self.firstTime = False
         elif self.keepStraight.get() and not self.firstTime:
             self.turnController.enable()
-            #self.rotationXbox = self.rotationPID
+            self.rotationXbox = self.rotationPID
         else:
             self.firstTime = True
             self.turnController.disable()
-            self.rotationXbox = self.joystick.getRawAxis(4) #Dead zone that the Xbox controller has
-
-       
-        self.rotationXbox = self.joystick.getRawAxis(4)
-        if self.rotationXbox < .15 and self.rotationXbox > -.15:
-            self.rotationXbox=0
-        self.total = -1*((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
+            self.rotationXbox = (self.joystick.getRawAxis(4))*.5 #Dead zone that the Xbox controller has
+            if self.rotationXbox < .15 and self.rotationXbox > -.15:
+                self.rotationXbox=0
+        self.total = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
         
-        if self.motorWhere==True:
+        if self.motorWhere==False:
             #print ("tank")
             self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX())
-        elif self.motorWhere==False:
+        elif self.motorWhere==True:
             #print ("Mec")
             #self.robodrive.mecanumDrive_Cartesian((self.total*self.joystick.getX()),self.rotationXbox,(self.total*self.joystick.getY()) , 0)
-            self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), self.rotationXbox, (self.total*self.joystick.getY()), 0)
+            self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
 
     def pidWrite(self, output):
 
