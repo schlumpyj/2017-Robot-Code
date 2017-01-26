@@ -29,6 +29,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         self.navx = navx.AHRS.create_spi()
         self.psiSensor = wpilib.AnalogInput(0)
+        self.powerBoard = wpilib.PowerDistributionPanel(0) #Might need or not
         
         self.joystick = wpilib.Joystick(0) #Should be xbox controller
         
@@ -88,6 +89,8 @@ class MyRobot(wpilib.IterativeRobot):
             Human controlled period
         """
         self.ledRing.set(wpilib.Relay.Value.kOn)
+        
+        self.updater()
         
         if self.pistonUp.get():
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kReverse)
