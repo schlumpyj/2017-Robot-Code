@@ -141,6 +141,7 @@ class MyRobot(wpilib.IterativeRobot):
     def updater(self):
         
         wpilib.SmartDashboard.putNumber('PSI', self.psiSensor.getVoltage())
+        wpilib.SmartDashboard.putNumber('CAN', self.motor1.getOutputCurrent()) #Just to see what voltage the motors typically go through
         
 if __name__=="__main__":
     wpilib.run(MyRobot)
