@@ -28,8 +28,9 @@ class MyRobot(wpilib.IterativeRobot):
         Sensors
         """
         self.navx = navx.AHRS.create_spi()
+        self.psiSensor = wpilib.AnalogInput(0)
         
-        self.joystick = wpilib.Joystick(0)#Should be xbox controller
+        self.joystick = wpilib.Joystick(0) #Should be xbox controller
         
         """
         Buttons
@@ -130,6 +131,9 @@ class MyRobot(wpilib.IterativeRobot):
     def pidWrite(self, output):
 
         self.rotationPID = output
+        
+    def updater(self):
+        
         
 if __name__=="__main__":
     wpilib.run(MyRobot)
