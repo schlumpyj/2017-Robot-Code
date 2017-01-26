@@ -21,6 +21,10 @@ class MyRobot(wpilib.IterativeRobot):
         self.climb2 = wpilib.VictorSP(8)
         
         """
+        Spike Relay for LED
+        """
+        self.ledRing = wpilib.Relay(0, wpilib.Relay.Direction.kForward) #Only goes forward voltage
+        """
         Sensors
         """
         self.navx = navx.AHRS.create_spi()
@@ -63,7 +67,7 @@ class MyRobot(wpilib.IterativeRobot):
     
     def teleopInit(self): 
         """"
-        Makes sure the piston is where we think it is
+            Makes sure the piston is where we think it is
         """"
         print ("hello")
         state = self.drivePiston.get()
@@ -79,6 +83,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Human controlled period
         """
+        self.ledRing.set(wpilib.Relay.Value.kOn)
         
         if self.pistonUp.get():
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kReverse)
