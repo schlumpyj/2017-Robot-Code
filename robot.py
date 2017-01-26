@@ -17,6 +17,9 @@ class MyRobot(wpilib.IterativeRobot):
         self.motor3 = ctre.CANTalon(3)
         self.motor4 = ctre.CANTalon(4)
         
+        self.climb1 = wpilib.VictorSP(7)
+        self.climb2 = wpilib.VictorSP(8)
+        
         """
         Sensors
         """
@@ -39,6 +42,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.rotationPID = 0
         self.firstTime = True
         self.testingAngle = 0
+        self.climbVoltage = 0
         """
         Timer
         """
@@ -103,6 +107,8 @@ class MyRobot(wpilib.IterativeRobot):
             if self.rotationXbox < .15 and self.rotationXbox > -.15:
                 self.rotationXbox=0
             
+        self.climb()
+        
         self.total = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
         
         if self.motorWhere==False:
@@ -110,6 +116,12 @@ class MyRobot(wpilib.IterativeRobot):
         elif self.motorWhere==True:
             self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
 
+    def climb(self):
+        
+        self.climbVoltage = self.joystick.getRawAxis(2)
+        self.climb1.set(self.climbVoltage)
+        self.climb2.set(self.climbVoltage)
+            
     def pidWrite(self, output):
 
         self.rotationPID = output
