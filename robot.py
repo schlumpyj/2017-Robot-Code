@@ -48,6 +48,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.firstTime = True
         self.testingAngle = 0
         self.climbVoltage = 0
+        
         """
         Timer
         """
@@ -65,7 +66,9 @@ class MyRobot(wpilib.IterativeRobot):
         turnController.setOutputRange(-.5, .5)
         turnController.setContinuous(True)
         self.turnController = turnController
-    
+        
+        self.updater()
+        
     def teleopInit(self): 
         """"
             Makes sure the piston is where we think it is
@@ -134,6 +137,7 @@ class MyRobot(wpilib.IterativeRobot):
         
     def updater(self):
         
+        wpilib.SmartDashboard.putNumber('PSI', self.psiSensor.getVoltage())
         
 if __name__=="__main__":
     wpilib.run(MyRobot)
