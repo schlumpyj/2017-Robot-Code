@@ -58,7 +58,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         PIDs
         """
-        kP = 0.01
+        kP = 0.015
         kI = 0.00
         kD = 0.00
         kF = 0.00
@@ -98,27 +98,8 @@ class MyRobot(wpilib.IterativeRobot):
         elif self.pistonDown.get():
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
             self.motorWhere = True
-        
-        self.testingAngle = self.testingAngle+(self.joystick.getRawAxis(4)*2) #Maybe multiply by two?
-        
-        if self.testingAngle >= 180:
-            self.testingAngle = self.testingAngle-360
-        elif self.testingAngle <= -180:
-            self.testingAngle = self.testingAngle+360
-        
-        if self.keepStraight.get() and self.firstTime:
-            self.turnController.setSetpoint(self.navx.getYaw())
-            self.firstTime = False
-        elif self.keepStraight.get() and not self.firstTime:
-            self.turnController.enable()
-            self.rotationXbox = self.rotationPID
-        else:
-            self.firstTime = True
-            self.turnController.disable()
-            self.rotationXbox = (self.joystick.getRawAxis(4))*.5 #Dead zone that the Xbox controller has
-            if self.rotationXbox < .15 and self.rotationXbox > -.15:
-                self.rotationXbox=0
             
+        self.driveStraight()
         self.climb()
         
         self.total = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
@@ -127,7 +108,22 @@ class MyRobot(wpilib.IterativeRobot):
             self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX())
         elif self.motorWhere==True:
             self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
-
+    
+    def driveStraight(self):
+        """
+            Drive Straight Algorithm to allow mecanums to fly free
+        """
+        self.rotationXbox = (self.joystick.getRawAxis(4))*.5 #Dead zone that the Xbox controller has    
+        if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
+            self.turnController.setSetpoint(self.navx.getYaw())
+            self.firstTime = false
+        elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
+            self.turnController.enable()
+            self.rotationXbox=self.rotationPID
+        else:
+            self.turnController.disable()
+            self.firstTime = True
+            
     def climb(self):
         
         self.climbVoltage = self.joystick.getRawAxis(2)
