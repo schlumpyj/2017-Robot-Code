@@ -58,8 +58,8 @@ class MyRobot(wpilib.IterativeRobot):
         """
         PIDs
         """
-        kP = 0.015
-        kI = 0.00
+        kP = 0.01
+        kI = 0.0001
         kD = 0.00
         kF = 0.00
         turnController = wpilib.PIDController(kP, kI, kD, kF, self.navx, output=self)
@@ -67,15 +67,25 @@ class MyRobot(wpilib.IterativeRobot):
         turnController.setOutputRange(-.5, .5)
         turnController.setContinuous(True)
         self.turnController = turnController
+
+        self.components = {
+            'drive': self.robodrive
+        }
+        self.automodes = AutonomousModeSelector('autonomous',
+                                        self.components)
         
         self.updater()
+
+    def autonomousPeriodic(self):
+        self.automodes.run()
         
     def teleopInit(self): 
-        """"
+        """
             Makes sure the piston is where we think it is
-        """"
+        """
         print ("hello")
         state = self.drivePiston.get()
+        print (state)
         if state == wpilib.DoubleSolenoid.Value.kForward:
             self.motorWhere=True
         elif state == wpilib.DoubleSolenoid.Value.kReverse:
@@ -96,6 +106,7 @@ class MyRobot(wpilib.IterativeRobot):
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kReverse)
             self.motorWhere = False
         elif self.pistonDown.get():
+            self.firstTime = True
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
             self.motorWhere = True
             
@@ -105,7 +116,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.total = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
         
         if self.motorWhere==False:
-            self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX())
+            self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX(), True)
         elif self.motorWhere==True:
             self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
     
@@ -115,12 +126,14 @@ class MyRobot(wpilib.IterativeRobot):
         """
         self.rotationXbox = (self.joystick.getRawAxis(4))*.5 #Dead zone that the Xbox controller has    
         if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
-            self.turnController.setSetpoint(self.navx.getYaw())
-            self.firstTime = false
+            if self.timer.hasPeriodPassed(.5):
+                self.turnController.setSetpoint(self.navx.getYaw())
+                self.firstTime = False
         elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
             self.turnController.enable()
             self.rotationXbox=self.rotationPID
         else:
+            self.timer.reset()
             self.turnController.disable()
             self.firstTime = True
             
