@@ -15,6 +15,6 @@ class DriveForward(StatefulAutonomous):
     def drive_wait(self):
         pass
 
-    @timed_state(duration=5)
+    @timed_state(duration=2)
     def drive_forward(self):
-        self.drive.drive(self.drive_speed, 0)
+        self.robodrive.drive(self.drive_speed, 0)
