@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import wpilib
 import wpilib.buttons
+import ctre
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from networktables import NetworkTable
@@ -12,10 +13,10 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Motors
         """
-        self.motor1 = wpilib.Talon(1) #Drive Motors
-        self.motor2 = wpilib.Talon(2)
-        self.motor3 = wpilib.Talon(3)
-        self.motor4 = wpilib.Talon(4)
+        self.motor1 = ctre.CANTalon(1) #Drive Motors
+        self.motor2 = ctre.CANTalon(2)
+        self.motor3 = ctre.CANTalon(3)
+        self.motor4 = ctre.CANTalon(4)
 
         self.climb1 = wpilib.VictorSP(7)
         self.climb2 = wpilib.VictorSP(8)
@@ -150,7 +151,7 @@ class MyRobot(wpilib.IterativeRobot):
     def updater(self):
 
         wpilib.SmartDashboard.putNumber('PSI', self.psiSensor.getVoltage())
-        #wpilib.SmartDashboard.putNumber('CAN', self.motor1.getOutputCurrent()) #Just to see what voltage the motors typically go through
+        wpilib.SmartDashboard.putNumber('CAN', self.motor1.getOutputCurrent()) #Just to see what voltage the motors typically go through
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
