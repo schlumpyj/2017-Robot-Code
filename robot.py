@@ -69,10 +69,22 @@ class MyRobot(wpilib.IterativeRobot):
         turnController.setContinuous(True)
         self.turnController = turnController
 
+        kPTwo = 0.01
+        kITwo = 0.0001
+        kDTwo = 0.00
+        kFTwo = 0.00
+        autoTurnController = wpilib.PIDController(kPTwo, kITwo, kDTwo, kFTwo, self.navx, output=self)
+        autoTurnController.setInputRange(-180.0,  180.0)
+        autoTurnController.setOutputRange(-.5, .5)
+        autoTurnController.setContinuous(True)
+        autoTurnController.setAbsoluteTolerance(2.0)
+        self.autoTurnController = autoTurnController
+
         self.components = {
-            'drive': self.robodrive
+            'drive': self.robodrive,
+            'turner': self.autoTurnController
         }
-        self.automodes = AutonomousModeSelector('autonomous',
+        self.automodes = AutonomousModeSelector('pleaseFindMe',
                                         self.components)
 
         self.updater()
@@ -151,7 +163,7 @@ class MyRobot(wpilib.IterativeRobot):
     def updater(self):
 
         wpilib.SmartDashboard.putNumber('PSI', self.psiSensor.getVoltage())
-        wpilib.SmartDashboard.putNumber('CAN', self.motor1.getOutputCurrent()) #Just to see what voltage the motors typically go through
+        #wpilib.SmartDashboard.putNumber('CAN', self.motor1.getOutputCurrent()) #Just to see what voltage the motors typically go through
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
