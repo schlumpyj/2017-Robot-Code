@@ -5,7 +5,6 @@ import ctre
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from networktables import NetworkTable
-import networktables
 
 class MyRobot(wpilib.IterativeRobot):
 
@@ -51,6 +50,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.testingAngle = 0
         self.climbVoltage = 0
 
+        self.driverStation = wpilib.DriverStation
+
         """
         Timer
         """
@@ -86,6 +87,11 @@ class MyRobot(wpilib.IterativeRobot):
         }
         self.automodes = AutonomousModeSelector('pleaseFindMe',
                                         self.components)
+        """
+        The great NetworkTables part
+        """
+        self.vision_table = NetworkTable.getTable('/GRIP/myContoursReport')
+        self.robotStats = NetworkTable.getTable('SmartDashboard')
 
         self.updater()
 
@@ -162,8 +168,15 @@ class MyRobot(wpilib.IterativeRobot):
 
     def updater(self):
 
-        wpilib.SmartDashboard.putNumber('PSI', self.psiSensor.getVoltage())
-        #wpilib.SmartDashboard.putNumber('CAN', self.motor1.getOutputCurrent()) #Just to see what voltage the motors typically go through
+        self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
+        self.robotStats.putNumber('CAN', self.motor1.getOutputCurrent())
+
+        if self.driverStation.InAutonomous():
+            self.robotStats.putNumber('TIME', (self.driverStation.getMatchTime()+135))
+        elif self.driverStation.InOperatorControl():
+            self.robotStats.putNumber('TIME', self.driverStation.getMatchTime())
+        else:
+            self.robotStats.putNumber('TIME', 150)
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
