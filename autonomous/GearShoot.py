@@ -1,4 +1,4 @@
-from robotpy_ext.autonomous import StatefulAutonomous, timed_state
+from robotpy_ext.autonomous import StatefulAutonomous, timed_state, state
 
 class DriveForward(StatefulAutonomous):
 
@@ -8,7 +8,7 @@ class DriveForward(StatefulAutonomous):
     def initialize(self):
 
         self.drive_speed = 0.5
-
+        self.rotationPID = 0
 
     @timed_state(duration=0.5, next_state='drive_forward', first=True)
     def drive_wait(self):
@@ -40,3 +40,7 @@ class DriveForward(StatefulAutonomous):
     @timed_state(duration=1.5)
     def goBack(self):
         self.drive.drive(self.drive_speed, 0)
+
+    def pidWrite(self, output):
+
+        self.rotationPID = output
