@@ -22,13 +22,15 @@ class DriveForward(StatefulAutonomous):
     def startPID(self):
         self.turner.setSetpoint(30)
         self.turner.enable()
-        self.next_state('stopPID')
         self.drive.drive(0,0)
+        self.next_state('stopPID')
+
 
     @state()
     def stopPID(self):
         if self.turner.onTarget():
             self.turner.disable()
+            self.drive.drive(0,0)
             self.next_state('hold')
         else:
             self.drive.mecanumDrive_Cartesian(0, -1*self.rotationPID, 0, 0)
@@ -42,5 +44,4 @@ class DriveForward(StatefulAutonomous):
         self.drive.drive(self.drive_speed, 0)
 
     def pidWrite(self, output):
-
         self.rotationPID = output
