@@ -217,15 +217,17 @@ class MyRobot(wpilib.IterativeRobot):
             if self.vibrateTimer.hasPeriodPassed(0.25):
                 #turn off
                 self.joystick.setRumble(1, 0)
+                self.vibrateState = 3
                 
-            else if self.vibrateTimer.hasPeriodPassed(0.75):
+        elif (self.vibrateState == 3):   
+            elif self.vibrateTimer.hasPeriodPassed(0.50):
                 if (self.driveViState == 2):
                     #go around again
                     self.vibrateState = 1
                     self.driveViState = 1 
                     #set to its default pos
                 else:
-                    self.vibrateState = 3
+                    self.vibrateState = 4 #set to null
                 
         
         
