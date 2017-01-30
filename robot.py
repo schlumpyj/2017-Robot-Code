@@ -58,7 +58,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.vibrateState = 4
         self.duration = .25
         
-        self.driverStation = wpilib.DriverStation
+        #self.driverStation = wpilib.DriverStation()
 
         """
         Timers
@@ -97,7 +97,7 @@ class MyRobot(wpilib.IterativeRobot):
             'drive': self.robodrive,
             'turner': self.autoTurnController
         }
-        self.automodes = AutonomousModeSelector('pleaseFindMe',
+        self.automodes = AutonomousModeSelector('autonomous',
                                         self.components)
         """
         The great NetworkTables part
@@ -115,6 +115,7 @@ class MyRobot(wpilib.IterativeRobot):
             Makes sure the piston is where we think it is
         """
         self.whichMethod = True
+        self.firstTime = True
         print ("hello")
         state = self.drivePiston.get()
         print (state)
@@ -165,6 +166,7 @@ class MyRobot(wpilib.IterativeRobot):
             else:
                 self.duration = .25
             self.vibrateState = 1
+            self.firstTime = True
             
         self.rotationXbox = (self.joystick.getRawAxis(4))*.5 
         
@@ -199,7 +201,7 @@ class MyRobot(wpilib.IterativeRobot):
             self.joystick.setRumble(1, .9)
             self.vibrateState = 2
         elif self.vibrateState == 2:
-            if self.vibrateTimer.hasPeriodPassed(self.duration)
+            if self.vibrateTimer.hasPeriodPassed(self.duration):
                 self.joystick.setRumble(1, 0)
                 self.vibrateState = 3
                 
@@ -212,12 +214,12 @@ class MyRobot(wpilib.IterativeRobot):
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
         self.robotStats.putNumber('CAN', self.motor1.getOutputCurrent())
 
-        if self.driverStation.InAutonomous():
+        """if self.driverStation.InAutonomous():
             self.robotStats.putNumber('TIME', (self.driverStation.getMatchTime()+135))
         elif self.driverStation.InOperatorControl():
             self.robotStats.putNumber('TIME', self.driverStation.getMatchTime())
         else:
             self.robotStats.putNumber('TIME', 150)
-
+        """
 if __name__=="__main__":
     wpilib.run(MyRobot)
