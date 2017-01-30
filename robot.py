@@ -62,7 +62,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.climbVoltage = 0
         self.whichMethod = True
         self.vibrateState = 4
-        self.duration = .25
+        self.driveViState = 1
         
         #self.driverStation = wpilib.DriverStation()
 
@@ -168,9 +168,9 @@ class MyRobot(wpilib.IterativeRobot):
         if self.controlSwitch.get():
             self.whichMethod = not self.whichMethod
             if self.whichMethod:
-                self.duration = .5
+                self.driveViState = 2
             else:
-                self.duration = .25
+                self.driveViState = 1
             self.vibrateState = 1
             self.firstTime = True
             
@@ -210,6 +210,23 @@ class MyRobot(wpilib.IterativeRobot):
             self.climb2.set(self.climbVoltage)
 
     def vibrator(self):
+        #changed vibrator to pulse istead of long and short because its better
+        if (self.vibrateState == 1):
+            self.vibrateTimer.reset()
+            self.joystick.setRumble(1, .9)
+            self.vibrateState = 2
+        elif(self.vibrateState == 2):
+            if self.vibrateTimer.hasPeriodPassed(0.25)
+                self.joystick.setRumble(1, 0)
+                self.vibrateState = 3
+                if (self.driveViState == 2):
+                    #go around again
+                    self.vibrateState = 1
+                    self.driveViState = 1 
+                    #set to its default pos
+        
+        
+        """
         if self.vibrateState == 1:
             self.vibrateTimer.reset()
             self.joystick.setRumble(1, .9)
@@ -218,7 +235,7 @@ class MyRobot(wpilib.IterativeRobot):
             if self.vibrateTimer.hasPeriodPassed(self.duration):
                 self.joystick.setRumble(1, 0)
                 self.vibrateState = 3
-                
+        """
     def pidWrite(self, output):
 
         self.rotationPID = output
