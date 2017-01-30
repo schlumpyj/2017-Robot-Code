@@ -37,10 +37,16 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Buttons
         """
-        self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 1) #Will be left bumper
-        self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 2) #Will be right bumper
-        self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 3, period=0.5)
+        self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #Will be left bumper
+        self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #Will be right bumper
+        
+        #Controll switch init for auto lock direction
+        self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5)
 
+        #Button for slow reverse out of climb
+        self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,2)
+        
+        
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
 
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
@@ -190,10 +196,18 @@ class MyRobot(wpilib.IterativeRobot):
                 self.rotationXbox=0
                 
     def climb(self):
-
-        self.climbVoltage = self.joystick.getRawAxis(2)
-        self.climb1.set(self.climbVoltage)
-        self.climb2.set(self.climbVoltage)
+        if (self.climbReverseButton.get()):
+            #if the climb reverse is active set the motor to reverse
+            self.climbVoltage = self.joystick.getRawAxis(2)
+            
+            #multipication to invert values
+            self.climb1.set(self.climbVoltage * -1)
+            self.climb2.set(self.climbVoltage * -1)
+        else:
+            #else do as you normally do
+            self.climbVoltage = self.joystick.getRawAxis(2)
+            self.climb1.set(self.climbVoltage)
+            self.climb2.set(self.climbVoltage)
 
     def vibrator(self):
         if self.vibrateState == 1:
