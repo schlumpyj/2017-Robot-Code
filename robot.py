@@ -44,6 +44,10 @@ class MyRobot(wpilib.IterativeRobot):
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
 
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
+        
+        """
+        All the variables that need to be defined
+        """
         self.motorWhere = True #IF IT IS IN MECANUM BY DEFAULT
         self.rotationXbox = 0
         self.rotationPID = 0
@@ -51,14 +55,20 @@ class MyRobot(wpilib.IterativeRobot):
         self.testingAngle = 0
         self.climbVoltage = 0
         self.whichMethod = True
+        self.vibrateState = 4
+        self.duration = .25
         
         self.driverStation = wpilib.DriverStation
 
         """
-        Timer
+        Timers
         """
         self.timer = wpilib.Timer()
         self.timer.start()
+        
+        self.vibrateTimer = wpilib.Timer()
+        self.vibrateTimer.start()
+        
         """
         PIDs
         """
@@ -135,7 +145,8 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.driveStraight()
         self.climb()
-
+        self.vibrator()
+        
         self.total = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
 
         if self.motorWhere==False:
@@ -149,6 +160,11 @@ class MyRobot(wpilib.IterativeRobot):
         """
         if self.controlSwitch.get():
             self.whichMethod = not self.whichMethod
+            if self.whichMethod:
+                self.duration = .5
+            else:
+                self.duration = .25
+            self.vibrateState = 1
             
         self.rotationXbox = (self.joystick.getRawAxis(4))*.5 
         
@@ -177,10 +193,20 @@ class MyRobot(wpilib.IterativeRobot):
         self.climb1.set(self.climbVoltage)
         self.climb2.set(self.climbVoltage)
 
+    def vibrator(self):
+        if self.vibrateState == 1:
+            self.vibrateTimer.reset()
+            self.joystick.setRumble(1, .9)
+            self.vibrateState = 2
+        elif self.vibrateState == 2:
+            if self.vibrateTimer.hasPeriodPassed(self.duration)
+                self.joystick.setRumble(1, 0)
+                self.vibrateState = 3
+                
     def pidWrite(self, output):
 
         self.rotationPID = output
-
+        
     def updater(self):
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
