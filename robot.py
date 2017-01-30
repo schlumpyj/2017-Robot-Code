@@ -4,6 +4,7 @@ import wpilib.buttons
 import ctre
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
+from robotpy_ext.control import button_debouncer
 from networktables import NetworkTable
 
 class MyRobot(wpilib.IterativeRobot):
@@ -38,7 +39,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 1) #Will be left bumper
         self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 2) #Will be right bumper
-        self.keepStraight = wpilib.buttons.JoystickButton(self.joystick, 3)
+        self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 3, period=0.5)
 
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
 
@@ -49,7 +50,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.firstTime = True
         self.testingAngle = 0
         self.climbVoltage = 0
-
+        self.whichMethod = True
+        
         self.driverStation = wpilib.DriverStation
 
         """
@@ -102,6 +104,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Makes sure the piston is where we think it is
         """
+        self.whichMethod = True
         print ("hello")
         state = self.drivePiston.get()
         print (state)
@@ -116,6 +119,7 @@ class MyRobot(wpilib.IterativeRobot):
     def teleopPeriodic(self):
         """
             Human controlled period
+            TODO: Have Solenoid being set constantly
         """
         self.ledRing.set(wpilib.Relay.Value.kOn)
 
@@ -143,19 +147,30 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Drive Straight Algorithm to allow mecanums to fly free
         """
-        self.rotationXbox = (self.joystick.getRawAxis(4))*.5 #Dead zone that the Xbox controller has
-        if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
-            if self.timer.hasPeriodPassed(.5):
-                self.turnController.setSetpoint(self.navx.getYaw())
-                self.firstTime = False
-        elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
-            self.turnController.enable()
-            self.rotationXbox=self.rotationPID
+        if self.controlSwitch.get():
+            self.whichMethod = not self.whichMethod
+            
+        self.rotationXbox = (self.joystick.getRawAxis(4))*.5 
+        
+        """
+        This toggles between PID control and manual control
+        """
+        if self.whichMethod:
+            if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
+                if self.timer.hasPeriodPassed(.5):
+                    self.turnController.setSetpoint(self.navx.getYaw())
+                    self.firstTime = False
+            elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
+                self.turnController.enable()
+                self.rotationXbox=self.rotationPID
+            else:
+                self.timer.reset()
+                self.turnController.disable()
+                self.firstTime = True
         else:
-            self.timer.reset()
-            self.turnController.disable()
-            self.firstTime = True
-
+            if self.rotationXbox < .15 and self.rotationXbox > -.15:
+                self.rotationXbox=0
+                
     def climb(self):
 
         self.climbVoltage = self.joystick.getRawAxis(2)
