@@ -18,4 +18,3 @@ try:
 except:
     print (counter/(time.time()-start))
     vid1.release()
-    cv.destroyAllWindows()
