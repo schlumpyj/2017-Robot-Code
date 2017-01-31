@@ -7,4 +7,4 @@ Priorities = Gear, Climb, Shoot
 
 Autonomous = Place Gear, shoot ten fuel
 
-Authored the the great Josh and Caleb programming team
+Authored the great Josh and Caleb programming team
