@@ -196,16 +196,14 @@ class MyRobot(wpilib.IterativeRobot):
                 self.rotationXbox=0
                 
     def climb(self):
+        self.climbVoltage = self.joystick.getRawAxis(2)
         if (self.climbReverseButton.get()):
             #if the climb reverse is active set the motor to reverse
-            self.climbVoltage = self.joystick.getRawAxis(2)
-            
             #multipication to invert values
             self.climb1.set(self.climbVoltage * -1)
             self.climb2.set(self.climbVoltage * -1)
         else:
             #else do as you normally do
-            self.climbVoltage = self.joystick.getRawAxis(2)
             self.climb1.set(self.climbVoltage)
             self.climb2.set(self.climbVoltage)
 
@@ -231,18 +229,6 @@ class MyRobot(wpilib.IterativeRobot):
                 else:
                     self.vibrateState = 4 #set to null
                 
-        
-        
-        """
-        if self.vibrateState == 1:
-            self.vibrateTimer.reset()
-            self.joystick.setRumble(1, .9)
-            self.vibrateState = 2
-        elif self.vibrateState == 2:
-            if self.vibrateTimer.hasPeriodPassed(self.duration):
-                self.joystick.setRumble(1, 0)
-                self.vibrateState = 3
-        """
     def pidWrite(self, output):
 
         self.rotationPID = output
