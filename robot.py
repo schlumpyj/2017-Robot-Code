@@ -37,9 +37,10 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Buttons
         """
-        self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #Will be left bumper
-        self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #Will be right bumper
-
+        self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #left bumper
+        self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #right bumper
+        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 3) #X button
+        
         #Controll switch init for auto lock direction
         self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5)
 
@@ -63,8 +64,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.whichMethod = True
         self.vibrateState = 4
         self.driveViState = 1
-
-        self.driverStation = wpilib.DriverStation.getInstance()
 
         """
         Timers
@@ -109,6 +108,7 @@ class MyRobot(wpilib.IterativeRobot):
         The great NetworkTables part
         """
         self.vision_table = NetworkTable.getTable('/GRIP/myContoursReport')
+        self.vision_x= networktables.NumberArray()
         self.robotStats = NetworkTable.getTable('SmartDashboard')
 
         self.updater()
@@ -129,6 +129,10 @@ class MyRobot(wpilib.IterativeRobot):
             Human controlled period
             TODO: Have Solenoid being set constantly
         """
+        if self.visionEnable.get():
+            self.firstTime = True
+            self.whichMethod = True
+        
         self.ledRing.set(wpilib.Relay.Value.kOn)
 
         self.updater()
@@ -150,7 +154,10 @@ class MyRobot(wpilib.IterativeRobot):
             self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX(), True)
         elif self.motorWhere==True:
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
-            self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
+            if self.visionEnable.get():
+                self.robodrive.mecanumDrive_Cartesian((self.strafe_calc, -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
+            else:
+                self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
 
     def driveStraight(self):
         """
@@ -219,6 +226,23 @@ class MyRobot(wpilib.IterativeRobot):
                     #set to its default pos
                 else:
                     self.vibrateState = 4 #set to null
+
+    def alignGear(self):
+        """
+            This is very experimental and is just a test to see if mecanums can work
+        """
+        try:
+            self.vision_table.retrieveValue('centerX', self.vision_x)
+        except KeyError:
+            pass
+        
+        if len(self.vision_x)>0:
+            self.vision_x=self.vision_x[0]
+            if self.vision_x > 180:
+                self.strafe_calc=(((self.vision_x-180)/140)*.15)+.15
+
+            elif self.vision_numberX < 150:
+                self.strafe_calc=-1*((((150-self.vision_x)/150)*.15)+.15)
 
     def pidWrite(self, output):
 
