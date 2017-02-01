@@ -1,7 +1,7 @@
 import cv2
 import numpy
 import math
-from enum import Enum
+from networktables import NetworkTables
 
 class GripPipeline:
     """
@@ -11,7 +11,10 @@ class GripPipeline:
     def __init__(self):
         """initializes all values to presets or None if need to be set
         """
-
+        NetworkTables.initialize(server='10.44.80.22') #Current Roborio address
+        NetworkTables.setUpdateRate(.02)
+        self.numberPublish = NetworkTables.getTable('/GRIP/myContoursReport')
+        
         self.__hsl_threshold_hue = [56.6546762589928, 83.28925638990128]
         self.__hsl_threshold_saturation = [229.31654676258992, 255.0]
         self.__hsl_threshold_luminance = [13.758992805755396, 51.51952461799658]
@@ -54,7 +57,17 @@ class GripPipeline:
         # Step Filter_Contours0:
         self.__filter_contours_contours = self.find_contours_output
         (self.filter_contours_output) = self.__filter_contours(self.__filter_contours_contours, self.__filter_contours_min_area, self.__filter_contours_min_perimeter, self.__filter_contours_min_width, self.__filter_contours_max_width, self.__filter_contours_min_height, self.__filter_contours_max_height, self.__filter_contours_solidity, self.__filter_contours_max_vertices, self.__filter_contours_min_vertices, self.__filter_contours_min_ratio, self.__filter_contours_max_ratio)
-
+        center_x_positions = []
+        total = 0
+        for contour in self.filter_contours_output:
+            x, y, w, h = cv2.boundingRect(contour)
+            center_x_positions.append(x + w / 2)
+        for i in center_x_positions:
+            total+=1
+        if len(center_x_positions) > 0:
+            xNumbers = (total/len(center_x_positions))
+            print xNumbers
+            self.numberPublish.putNumber('centerX', xNumbers)
 
     @staticmethod
     def __hsl_threshold(input, hue, sat, lum):
