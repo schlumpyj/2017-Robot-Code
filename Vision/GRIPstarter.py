@@ -15,6 +15,6 @@ try:
         k = cv.waitKey(5) & 0xFF
         if k == 27:
             break
-except:
+except KeyboardInterrupt:
     print (counter/(time.time()-start))
     vid1.release()
