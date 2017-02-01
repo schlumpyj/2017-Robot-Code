@@ -242,14 +242,13 @@ class MyRobot(wpilib.IterativeRobot):
         """
         try:
             if wpilib.RobotBase.isSimulation():
-                self.vision_x=[250]
+                self.vision_x=250
             else:
-                self.vision_x = self.vision_table.getNumberArray('centerX', [])
+                self.vision_x = self.vision_table.getNumber('centerX', 0)
         except KeyError:
             pass
 
-        if len(self.vision_x)>0:
-            self.vision_x=self.vision_x[0]
+        if (self.vision_x)!=0:
             if self.vision_x > 180:
                 self.strafe_calc=(((self.vision_x-180)/140)*.15)+.15
 
