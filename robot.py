@@ -138,9 +138,6 @@ class MyRobot(wpilib.IterativeRobot):
             Human controlled period
             TODO: Have Solenoid being set constantly
         """
-        if self.visionEnable.get():
-            self.firstTime = True
-            self.whichMethod = True
 
         self.ledRing.set(wpilib.Relay.Value.kOn)
 
@@ -164,10 +161,7 @@ class MyRobot(wpilib.IterativeRobot):
             self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX(), True)
         elif self.motorWhere==True:
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
-            if self.visionEnable.get():
-                self.robodrive.mecanumDrive_Cartesian(self.strafe_calc, -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
-            else:
-                self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
+            self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
 
     def driveStraight(self):
         """
@@ -264,12 +258,12 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 
-        if self.isAutonomous():
+        """if self.isAutonomous():
             self.robotStats.putNumber('TIME', (self.driverStation.getMatchTime()+135))
         elif self.isOperatorControl():
             self.robotStats.putNumber('TIME', self.driverStation.getMatchTime())
         else:
-            self.robotStats.putNumber('TIME', 150)
+            self.robotStats.putNumber('TIME', 150)"""
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
