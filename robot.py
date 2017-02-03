@@ -138,7 +138,7 @@ class MyRobot(wpilib.IterativeRobot):
             Human controlled period
             TODO: Have Solenoid being set constantly
         """
-
+        
         self.ledRing.set(wpilib.Relay.Value.kOn)
 
         self.updater()
@@ -257,13 +257,8 @@ class MyRobot(wpilib.IterativeRobot):
     def updater(self):
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
-
-        """if self.isAutonomous():
-            self.robotStats.putNumber('TIME', (self.driverStation.getMatchTime()+135))
-        elif self.isOperatorControl():
-            self.robotStats.putNumber('TIME', self.driverStation.getMatchTime())
-        else:
-            self.robotStats.putNumber('TIME', 150)"""
+        #Starts Auto at 0, starts teleop at 15 and while disabled is 0 seconds
+        self.robotStats.putNumber('TIME', (self.timer.getMatchTime())) 
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
