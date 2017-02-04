@@ -37,8 +37,9 @@ class MyRobot(wpilib.IterativeRobot):
         self.navx = navx.AHRS.create_spi()
         self.psiSensor = wpilib.AnalogInput(0)
         self.powerBoard = wpilib.PowerDistributionPanel(0) #Might need or not
-        self.frontLeftUltra = wpilib.Ultrasonic(0, 1, units=0) #Haven't even hooked up the sensor yet
-        
+        self.frontLeftUltra = wpilib.Ultrasonic(0, 1, units=0)#Haven't even hooked up the sensor yet
+        self.frontLeftUltra.setAutomaticMode(True)
+
         self.joystick = wpilib.Joystick(0) #Should be xbox controller
 
         """
@@ -47,7 +48,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #left bumper
         self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #right bumper
         self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 3) #X button
-
+        self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 1)
         #Controll switch init for auto lock direction
         self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5)
 
@@ -56,7 +57,7 @@ class MyRobot(wpilib.IterativeRobot):
 
 
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
-
+        self.gearPiston = wpilib.Solenoid(2)
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
 
         """
@@ -73,7 +74,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.driveViState = 1
         self.strafe_calc = 0
 
-        self.driverStation = wpilib.DriverStation.getInstance()
+        
         """
         Timers
         """
@@ -149,6 +150,11 @@ class MyRobot(wpilib.IterativeRobot):
             self.firstTime = True
             self.motorWhere = True
 
+        if self.gearPistonButton.get():
+            self.gearPiston.set(True)
+        else:
+            self.gearPiston.set(False)
+
         self.driveStraight()
         self.climb()
         self.vibrator()
@@ -161,8 +167,15 @@ class MyRobot(wpilib.IterativeRobot):
             self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX(), True)
         elif self.motorWhere==True:
             self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
-            self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
-
+            if self.visionEnable.get():
+                #print ("vision Enabled!")
+                print (self.strafe_calc)
+                print (self.vision_x)
+                self.robodrive.mecanumDrive_Cartesian(self.strafe_calc, -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
+            else:    
+                self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
+        else:
+            print ("something went wrong")
     def driveStraight(self):
         """
             Drive Straight Algorithm to allow mecanums to fly free
@@ -245,20 +258,27 @@ class MyRobot(wpilib.IterativeRobot):
 
         if (self.vision_x)!=0:
             if self.vision_x > 180:
-                self.strafe_calc=(((self.vision_x-180)/140)*.15)+.15
+                self.strafe_calc=(((self.vision_x-180)/140)*.25)+.22
 
-            elif self.vision_numberX < 150:
-                self.strafe_calc=-1*((((150-self.vision_x)/150)*.15)+.15)
-
+            elif self.vision_x < 150:
+                self.strafe_calc=-1*((((150-self.vision_x)/150)*.25)+.22)
+            else:
+                self.strafe_calc = 0
     def pidWrite(self, output):
 
         self.rotationPID = output
 
+    def disabledPeriodic(self):
+
+        self.updater()
+
     def updater(self):
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
+        #print (self.frontLeftUltra.getRangeInches())
         #Starts Auto at 0, starts teleop at 15 and while disabled is 0 seconds
-        self.robotStats.putNumber('TIME', (self.timer.getMatchTime())) 
+        #if self.isOperatorControl() or self.isAutonomous():
+        #    self.robotStats.putNumber('TIME', (self.timer.getMatchTime())) 
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
