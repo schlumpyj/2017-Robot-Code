@@ -2,13 +2,25 @@
 import wpilib
 import wpilib.buttons
 import ctre
-from components import drive
+from components import drive, climb, directions
+from misc import vibrator
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
 from networktables import NetworkTable
 import networktables
+
 class MyRobot(wpilib.IterativeRobot):
+
+    """
+
+        TODO:
+            Make own teleop and Auto time for dashboard
+            Move vibrator function over to another file, misc?
+            Clean up Drive Straight function if possible
+
+    """
+
 
     def robotInit(self):
         """
@@ -56,10 +68,12 @@ class MyRobot(wpilib.IterativeRobot):
 
 
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
+        self.gearPiston = wpilib.Solenoid(2)
 
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
 
         self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx)
+        self.climber = climb.Climb(self.climb1, self.climb2)
 
         """
         All the variables that need to be defined
@@ -84,25 +98,12 @@ class MyRobot(wpilib.IterativeRobot):
         self.vibrateTimer = wpilib.Timer()
         self.vibrateTimer.start()
 
-        """
-        PIDs
-        """
-
-        kPTwo = 0.01
-        kITwo = 0.0001
-        kDTwo = 0.00
-        kFTwo = 0.00
-        autoTurnController = wpilib.PIDController(kPTwo, kITwo, kDTwo, kFTwo, self.navx, output=self)
-        autoTurnController.setInputRange(-180.0,  180.0)
-        autoTurnController.setOutputRange(-.5, .5)
-        autoTurnController.setContinuous(True)
-        autoTurnController.setAbsoluteTolerance(2.0)
-        self.autoTurnController = autoTurnController
+        self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
 
         self.components = {
-            'drive': self.robodrive,
-            'turner': self.autoTurnController
+            'drive': self.Drive
         }
+
         self.automodes = AutonomousModeSelector('autonomous',
                                         self.components)
         """
@@ -115,6 +116,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.updater()
 
     def autonomousPeriodic(self):
+
         self.automodes.run()
 
     def teleopInit(self):
@@ -148,9 +150,15 @@ class MyRobot(wpilib.IterativeRobot):
         else:
             self.gearPiston.set(False)
 
+
+        self.climbVoltage = self.joystick.getRawAxis(2)
+        if (self.climbReverseButton.get()):
+            self.climber.climbNow(self.climbVoltage, directions.Direction.kReverse)
+        else:
+            self.climber.climbNow(self.climbVoltage, directions.Direction.kForward)
+
         self.driveStraight()
-        self.climb()
-        self.vibrator()
+        self.vibrator.runVibrate()
         self.alignGear()
 
         self.throttle = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
@@ -163,6 +171,10 @@ class MyRobot(wpilib.IterativeRobot):
 
             self.Drive.mecanumMove((-1*self.joystick.getX()),self.joystick.getY(), self.rotationXbox, self.throttle)
 
+        else:
+
+            print ("something bad happened")
+
     def driveStraight(self):
         """
             Drive Straight Algorithm to allow mecanums to fly free
@@ -170,10 +182,9 @@ class MyRobot(wpilib.IterativeRobot):
         if self.controlSwitch.get():
             self.whichMethod = not self.whichMethod
             if self.whichMethod:
-                self.driveViState = 2
+                self.vibrator.start(2)
             else:
-                self.driveViState = 1
-            self.vibrateState = 1
+                self.vibrator.start(1)
             self.firstTime = True
 
         self.rotationXbox = (self.joystick.getRawAxis(4))*.5
@@ -196,40 +207,6 @@ class MyRobot(wpilib.IterativeRobot):
             if self.rotationXbox < .15 and self.rotationXbox > -.15:
                 self.rotationXbox=0
 
-    def climb(self):
-        self.climbVoltage = self.joystick.getRawAxis(2)
-        if (self.climbReverseButton.get()):
-            #if the climb reverse is active set the motor to reverse
-            #multipication to invert values
-            self.climb1.set(self.climbVoltage * -1)
-            self.climb2.set(self.climbVoltage * -1)
-        else:
-            #else do as you normally do
-            self.climb1.set(self.climbVoltage)
-            self.climb2.set(self.climbVoltage)
-
-    def vibrator(self):
-        #changed vibrator to pulse istead of long and short because its better
-        if (self.vibrateState == 1):
-            self.vibrateTimer.reset()
-            self.joystick.setRumble(1, .9)
-            self.vibrateState = 2
-        elif(self.vibrateState == 2):
-            if self.vibrateTimer.hasPeriodPassed(0.25):
-                #turn off
-                self.joystick.setRumble(1, 0)
-                self.vibrateState = 3
-
-        elif (self.vibrateState == 3):
-            if self.vibrateTimer.hasPeriodPassed(0.50):
-                if (self.driveViState == 2):
-                    #go around again
-                    self.vibrateState = 1
-                    self.driveViState = 1
-                    #set to its default pos
-                else:
-                    self.vibrateState = 4 #set to null
-
     def alignGear(self):
         """
             This is very experimental and is just a test to see if mecanums can work
@@ -239,21 +216,15 @@ class MyRobot(wpilib.IterativeRobot):
                 self.vision_x=250
             else:
                 self.vision_x = self.vision_table.getNumber('centerX', 0)
+            if self.visionEnable.get():
+                self.Drive.engageVisionX(self.vision_x)
         except KeyError:
             pass
-
-        if (self.vision_x)!=0:
-            if self.vision_x > 180:
-                self.strafe_calc=(((self.vision_x-180)/140)*.25)+.22
-
-            elif self.vision_x < 150:
-                self.strafe_calc=-1*((((150-self.vision_x)/150)*.25)+.22)
-            else:
-                self.strafe_calc = 0
 
     def updater(self):
         """
             TODO: Needs reliable match time
+            Maybe move this to another file
         """
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
