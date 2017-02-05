@@ -3,7 +3,7 @@ import wpilib
 import wpilib.buttons
 import ctre
 from components import drive, climb, directions
-from misc import vibrator
+from misc import vibrator, matchTime
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
@@ -13,12 +13,8 @@ import networktables
 class MyRobot(wpilib.IterativeRobot):
 
     """
-
         TODO:
-            Make own teleop and Auto time for dashboard
-            Move vibrator function over to another file, misc?
             Clean up Drive Straight function if possible
-
     """
 
 
@@ -100,6 +96,8 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
 
+
+
         self.components = {
             'drive': self.Drive
         }
@@ -112,12 +110,17 @@ class MyRobot(wpilib.IterativeRobot):
         self.vision_table = NetworkTable.getTable('/GRIP/myContoursReport')
         self.vision_x= 0
         self.robotStats = NetworkTable.getTable('SmartDashboard')
-
+        self.matchTime = matchTime.MatchTime(self.timer, self.robotStats)
         self.updater()
+
+    def autonomousInit(self):
+
+        self.matchTime.startMode(isAuto=True)
 
     def autonomousPeriodic(self):
 
         self.automodes.run()
+        self.matchTime.pushTime()
 
     def teleopInit(self):
         """
@@ -126,11 +129,14 @@ class MyRobot(wpilib.IterativeRobot):
         self.whichMethod = True
         self.firstTime = True
         self.timer.reset()
+        self.matchTime.startMode(isAuto=False)
 
     def teleopPeriodic(self):
         """
             Human controlled period
         """
+        self.matchTime.pushTime()
+
         if self.visionEnable.get():
             self.firstTime = True
             self.whichMethod = True
@@ -222,10 +228,6 @@ class MyRobot(wpilib.IterativeRobot):
             pass
 
     def updater(self):
-        """
-            TODO: Needs reliable match time
-            Maybe move this to another file
-        """
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 
