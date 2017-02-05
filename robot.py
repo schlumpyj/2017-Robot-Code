@@ -2,6 +2,7 @@
 import wpilib
 import wpilib.buttons
 import ctre
+from components import drive
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
@@ -37,8 +38,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.navx = navx.AHRS.create_spi()
         self.psiSensor = wpilib.AnalogInput(0)
         self.powerBoard = wpilib.PowerDistributionPanel(0) #Might need or not
-        self.frontLeftUltra = wpilib.Ultrasonic(0, 1, units=0)#Haven't even hooked up the sensor yet
-        self.frontLeftUltra.setAutomaticMode(True)
 
         self.joystick = wpilib.Joystick(0) #Should be xbox controller
 
@@ -57,8 +56,10 @@ class MyRobot(wpilib.IterativeRobot):
 
 
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
-        self.gearPiston = wpilib.Solenoid(2)
+
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
+
+        self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx)
 
         """
         All the variables that need to be defined
@@ -74,7 +75,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.driveViState = 1
         self.strafe_calc = 0
 
-        
         """
         Timers
         """
@@ -87,15 +87,6 @@ class MyRobot(wpilib.IterativeRobot):
         """
         PIDs
         """
-        kP = 0.01
-        kI = 0.0001
-        kD = 0.00
-        kF = 0.00
-        turnController = wpilib.PIDController(kP, kI, kD, kF, self.navx, output=self)
-        turnController.setInputRange(-180.0,  180.0)
-        turnController.setOutputRange(-.5, .5)
-        turnController.setContinuous(True)
-        self.turnController = turnController
 
         kPTwo = 0.01
         kITwo = 0.0001
@@ -118,7 +109,7 @@ class MyRobot(wpilib.IterativeRobot):
         The great NetworkTables part
         """
         self.vision_table = NetworkTable.getTable('/GRIP/myContoursReport')
-        self.vision_x= []
+        self.vision_x= 0
         self.robotStats = NetworkTable.getTable('SmartDashboard')
 
         self.updater()
@@ -137,9 +128,11 @@ class MyRobot(wpilib.IterativeRobot):
     def teleopPeriodic(self):
         """
             Human controlled period
-            TODO: Have Solenoid being set constantly
         """
-        
+        if self.visionEnable.get():
+            self.firstTime = True
+            self.whichMethod = True
+
         self.ledRing.set(wpilib.Relay.Value.kOn)
 
         self.updater()
@@ -160,22 +153,16 @@ class MyRobot(wpilib.IterativeRobot):
         self.vibrator()
         self.alignGear()
 
-        self.total = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
+        self.throttle = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
 
         if self.motorWhere==False:
-            self.drivePiston.set(wpilib.DoubleSolenoid.Value.kReverse)
-            self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX(), True)
-        elif self.motorWhere==True:
-            self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
-            if self.visionEnable.get():
-                #print ("vision Enabled!")
-                print (self.strafe_calc)
-                print (self.vision_x)
-                self.robodrive.mecanumDrive_Cartesian(self.strafe_calc, -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
-            else:    
-                self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
-        else:
-            print ("something went wrong")
+
+            self.Drive.tankMove(-1*self.joystick.getX(), self.joystick.getY(), self.throttle)
+
+        elif self.motorWhere==True: # Mecanum
+
+            self.Drive.mecanumMove((-1*self.joystick.getX()),self.joystick.getY(), self.rotationXbox, self.throttle)
+
     def driveStraight(self):
         """
             Drive Straight Algorithm to allow mecanums to fly free
@@ -197,14 +184,13 @@ class MyRobot(wpilib.IterativeRobot):
         if self.whichMethod:
             if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
                 if self.timer.hasPeriodPassed(.5):
-                    self.turnController.setSetpoint(self.navx.getYaw())
+                    self.Drive.updateSetpoint()
                     self.firstTime = False
             elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
-                self.turnController.enable()
-                self.rotationXbox=self.rotationPID
+                self.Drive.setPIDenable(True)
             else:
                 self.timer.reset()
-                self.turnController.disable()
+                self.Drive.setPIDenable(True)
                 self.firstTime = True
         else:
             if self.rotationXbox < .15 and self.rotationXbox > -.15:
@@ -264,21 +250,14 @@ class MyRobot(wpilib.IterativeRobot):
                 self.strafe_calc=-1*((((150-self.vision_x)/150)*.25)+.22)
             else:
                 self.strafe_calc = 0
-    def pidWrite(self, output):
-
-        self.rotationPID = output
-
-    def disabledPeriodic(self):
-
-        self.updater()
 
     def updater(self):
+        """
+            TODO: Needs reliable match time
+        """
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
-        #print (self.frontLeftUltra.getRangeInches())
-        #Starts Auto at 0, starts teleop at 15 and while disabled is 0 seconds
-        #if self.isOperatorControl() or self.isAutonomous():
-        #    self.robotStats.putNumber('TIME', (self.timer.getMatchTime())) 
+
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
