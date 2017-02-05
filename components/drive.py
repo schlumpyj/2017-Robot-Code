@@ -12,18 +12,28 @@ class Drive(object):
         self.drivePiston = drivePiston
         self.rotation = 0
         self.gyro = gyro
+        self.vision_x = 0
+        self.strafe = 0
         self.robotDrive = robotDrive
 
         kP = 0.01
         kI = 0.0001
-        kD = 0.00
-        kF = 0.00
 
-        turnController = wpilib.PIDController(kP, kI, kD, kF, self.gyro, output=self)
+        turnController = wpilib.PIDController(kP, kI, 0, 0, self.gyro, output=self)
         turnController.setInputRange(-180.0,  180.0)
         turnController.setOutputRange(-.5, .5)
         turnController.setContinuous(True)
         self.turnController = turnController
+
+
+        visionP = 0.05 #Likely will have to be much higher
+
+        visionController = wpilib.PIDController(visionP, 0, 0, 0, lambda: self.vision_x, output=self.autoAlignOutput)
+        visionController.setInputRange(0.0, 320.0)
+        visionController.setOutputRange(-.5, .5)
+        visionController.setContinuous(False)
+        self.visionController = visionController
+        self.visionController.setSetpoint(160.0)
 
     def mecanumMove(self, x, y, rotation, throttle):
 
@@ -53,3 +63,12 @@ class Drive(object):
     def pidWrite(self, output):
 
         self.rotation = output
+
+    def engageVisionX(self, value):
+
+        self.visionController.enable()
+        self.vision_x = value
+
+    def autoAlignOutput(self, output):
+
+        self.strafe = output
