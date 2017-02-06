@@ -3,8 +3,8 @@
 
 Drivetrain = Octocanum
 
-Priorities = Gear, Climb, Shoot
+Priorities = Gear, Climb, Drop Fuel in Low Goal
 
-Autonomous = Place Gear, shoot ten fuel
+Autonomous = Place Gear, drop ten fuel off at low goal
 
-Authored the great Josh and Caleb programming team
+Authored by the great Josh and Caleb programming team

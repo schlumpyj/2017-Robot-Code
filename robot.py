@@ -2,21 +2,36 @@
 import wpilib
 import wpilib.buttons
 import ctre
+from components import drive, climb, directions
+from misc import vibrator, matchTime
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
 from networktables import NetworkTable
+import networktables
 
 class MyRobot(wpilib.IterativeRobot):
+
+    """
+        TODO:
+            Clean up Drive Straight function if possible
+    """
+
 
     def robotInit(self):
         """
         Motors
         """
-        self.motor1 = ctre.CANTalon(1) #Drive Motors
-        self.motor2 = ctre.CANTalon(2)
-        self.motor3 = ctre.CANTalon(3)
-        self.motor4 = ctre.CANTalon(4)
+        if not wpilib.RobotBase.isSimulation():
+            self.motor1 = ctre.CANTalon(1) #Drive Motors
+            self.motor2 = ctre.CANTalon(2)
+            self.motor3 = ctre.CANTalon(3)
+            self.motor4 = ctre.CANTalon(4)
+        else:
+            self.motor1 = wpilib.Talon(1) #Drive Motors
+            self.motor2 = wpilib.Talon(2)
+            self.motor3 = wpilib.Talon(3)
+            self.motor4 = wpilib.Talon(4)
 
         self.climb1 = wpilib.VictorSP(7)
         self.climb2 = wpilib.VictorSP(8)
@@ -37,9 +52,10 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Buttons
         """
-        self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #Will be left bumper
-        self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #Will be right bumper
-
+        self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #left bumper
+        self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #right bumper
+        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 3) #X button
+        self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 1)
         #Controll switch init for auto lock direction
         self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5)
 
@@ -48,8 +64,12 @@ class MyRobot(wpilib.IterativeRobot):
 
 
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
+        self.gearPiston = wpilib.Solenoid(2)
 
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
+
+        self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx)
+        self.climber = climb.Climb(self.climb1, self.climb2)
 
         """
         All the variables that need to be defined
@@ -63,8 +83,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.whichMethod = True
         self.vibrateState = 4
         self.driveViState = 1
-
-        self.driverStation = wpilib.DriverStation.getInstance()
+        self.strafe_calc = 0
 
         """
         Timers
@@ -75,46 +94,33 @@ class MyRobot(wpilib.IterativeRobot):
         self.vibrateTimer = wpilib.Timer()
         self.vibrateTimer.start()
 
-        """
-        PIDs
-        """
-        kP = 0.01
-        kI = 0.0001
-        kD = 0.00
-        kF = 0.00
-        turnController = wpilib.PIDController(kP, kI, kD, kF, self.navx, output=self)
-        turnController.setInputRange(-180.0,  180.0)
-        turnController.setOutputRange(-.5, .5)
-        turnController.setContinuous(True)
-        self.turnController = turnController
+        self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
 
-        kPTwo = 0.01
-        kITwo = 0.0001
-        kDTwo = 0.00
-        kFTwo = 0.00
-        autoTurnController = wpilib.PIDController(kPTwo, kITwo, kDTwo, kFTwo, self.navx, output=self)
-        autoTurnController.setInputRange(-180.0,  180.0)
-        autoTurnController.setOutputRange(-.5, .5)
-        autoTurnController.setContinuous(True)
-        autoTurnController.setAbsoluteTolerance(2.0)
-        self.autoTurnController = autoTurnController
+
 
         self.components = {
-            'drive': self.robodrive,
-            'turner': self.autoTurnController
+            'drive': self.Drive
         }
+
         self.automodes = AutonomousModeSelector('autonomous',
                                         self.components)
         """
         The great NetworkTables part
         """
         self.vision_table = NetworkTable.getTable('/GRIP/myContoursReport')
+        self.vision_x= 0
         self.robotStats = NetworkTable.getTable('SmartDashboard')
-
+        self.matchTime = matchTime.MatchTime(self.timer, self.robotStats)
         self.updater()
 
+    def autonomousInit(self):
+
+        self.matchTime.startMode(isAuto=True)
+
     def autonomousPeriodic(self):
+
         self.automodes.run()
+        self.matchTime.pushTime()
 
     def teleopInit(self):
         """
@@ -123,12 +129,18 @@ class MyRobot(wpilib.IterativeRobot):
         self.whichMethod = True
         self.firstTime = True
         self.timer.reset()
+        self.matchTime.startMode(isAuto=False)
 
     def teleopPeriodic(self):
         """
             Human controlled period
-            TODO: Have Solenoid being set constantly
         """
+        self.matchTime.pushTime()
+
+        if self.visionEnable.get():
+            self.firstTime = True
+            self.whichMethod = True
+
         self.ledRing.set(wpilib.Relay.Value.kOn)
 
         self.updater()
@@ -139,18 +151,35 @@ class MyRobot(wpilib.IterativeRobot):
             self.firstTime = True
             self.motorWhere = True
 
-        self.driveStraight()
-        self.climb()
-        self.vibrator()
+        if self.gearPistonButton.get():
+            self.gearPiston.set(True)
+        else:
+            self.gearPiston.set(False)
 
-        self.total = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
+
+        self.climbVoltage = self.joystick.getRawAxis(2)
+        if (self.climbReverseButton.get()):
+            self.climber.climbNow(self.climbVoltage, directions.Direction.kReverse)
+        else:
+            self.climber.climbNow(self.climbVoltage, directions.Direction.kForward)
+
+        self.driveStraight()
+        self.vibrator.runVibrate()
+        self.alignGear()
+
+        self.throttle = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
 
         if self.motorWhere==False:
-            self.drivePiston.set(wpilib.DoubleSolenoid.Value.kReverse)
-            self.robodrive.arcadeDrive(self.total*self.joystick.getY(), self.total*-1*self.joystick.getX(), True)
-        elif self.motorWhere==True:
-            self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
-            self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
+
+            self.Drive.tankMove(-1*self.joystick.getX(), self.joystick.getY(), self.throttle)
+
+        elif self.motorWhere==True: # Mecanum
+
+            self.Drive.mecanumMove((-1*self.joystick.getX()),self.joystick.getY(), self.rotationXbox, self.throttle)
+
+        else:
+
+            print ("something bad happened")
 
     def driveStraight(self):
         """
@@ -159,10 +188,9 @@ class MyRobot(wpilib.IterativeRobot):
         if self.controlSwitch.get():
             self.whichMethod = not self.whichMethod
             if self.whichMethod:
-                self.driveViState = 2
+                self.vibrator.start(2)
             else:
-                self.driveViState = 1
-            self.vibrateState = 1
+                self.vibrator.start(1)
             self.firstTime = True
 
         self.rotationXbox = (self.joystick.getRawAxis(4))*.5
@@ -173,68 +201,36 @@ class MyRobot(wpilib.IterativeRobot):
         if self.whichMethod:
             if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
                 if self.timer.hasPeriodPassed(.5):
-                    self.turnController.setSetpoint(self.navx.getYaw())
+                    self.Drive.updateSetpoint()
                     self.firstTime = False
             elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
-                self.turnController.enable()
-                self.rotationXbox=self.rotationPID
+                self.Drive.setPIDenable(True)
             else:
                 self.timer.reset()
-                self.turnController.disable()
+                self.Drive.setPIDenable(True)
                 self.firstTime = True
         else:
             if self.rotationXbox < .15 and self.rotationXbox > -.15:
                 self.rotationXbox=0
 
-    def climb(self):
-        self.climbVoltage = self.joystick.getRawAxis(2)
-        if (self.climbReverseButton.get()):
-            #if the climb reverse is active set the motor to reverse
-            #multipication to invert values
-            self.climb1.set(self.climbVoltage * -1)
-            self.climb2.set(self.climbVoltage * -1)
-        else:
-            #else do as you normally do
-            self.climb1.set(self.climbVoltage)
-            self.climb2.set(self.climbVoltage)
-
-    def vibrator(self):
-        #changed vibrator to pulse istead of long and short because its better
-        if (self.vibrateState == 1):
-            self.vibrateTimer.reset()
-            self.joystick.setRumble(1, .9)
-            self.vibrateState = 2
-        elif(self.vibrateState == 2):
-            if self.vibrateTimer.hasPeriodPassed(0.25):
-                #turn off
-                self.joystick.setRumble(1, 0)
-                self.vibrateState = 3
-
-        elif (self.vibrateState == 3):
-            if self.vibrateTimer.hasPeriodPassed(0.50):
-                if (self.driveViState == 2):
-                    #go around again
-                    self.vibrateState = 1
-                    self.driveViState = 1
-                    #set to its default pos
-                else:
-                    self.vibrateState = 4 #set to null
-
-    def pidWrite(self, output):
-
-        self.rotationPID = output
+    def alignGear(self):
+        """
+            This is very experimental and is just a test to see if mecanums can work
+        """
+        try:
+            if wpilib.RobotBase.isSimulation():
+                self.vision_x=250
+            else:
+                self.vision_x = self.vision_table.getNumber('centerX', 0)
+            if self.visionEnable.get():
+                self.Drive.engageVisionX(self.vision_x)
+        except KeyError:
+            pass
 
     def updater(self):
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
-        self.robotStats.putNumber('CAN', self.motor1.getOutputCurrent())
 
-        if self.isAutonomous():
-            self.robotStats.putNumber('TIME', (self.driverStation.getMatchTime()+135))
-        elif self.isOperatorControl():
-            self.robotStats.putNumber('TIME', self.driverStation.getMatchTime())
-        else:
-            self.robotStats.putNumber('TIME', 150)
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
