@@ -3,7 +3,7 @@ import wpilib
 import wpilib.buttons
 import ctre
 from components import drive, climb, directions
-from misc import vibrator, matchTime
+from misc import vibrator, matchTime, driveStraight
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
@@ -95,9 +95,14 @@ class MyRobot(wpilib.IterativeRobot):
         self.vibrateTimer.start()
 
         self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
-
-
-
+        
+        """
+        Drive Straight
+        """
+        self.DS = driveStraight.driveStraight(self.timer,self.whichMethod,self.vibrator,self.firstTime,self.joystick,self.Drive)
+        
+        
+        
         self.components = {
             'drive': self.Drive
         }
@@ -126,8 +131,10 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Makes sure the piston is where we think it is
         """
-        self.whichMethod = True
-        self.firstTime = True
+        #self.whichMethod = True
+        self.DS.setWhichVarible(True)
+        #self.firstTime = True
+        self.DS.setFirstTimeVariable(True)
         self.timer.reset()
         self.matchTime.startMode(isAuto=False)
 
@@ -138,8 +145,10 @@ class MyRobot(wpilib.IterativeRobot):
         self.matchTime.pushTime()
 
         if self.visionEnable.get():
-            self.firstTime = True
-            self.whichMethod = True
+            #self.firstTime = True
+            self.DS.setFirstTimeVariable(True)
+            #self.whichMethod = True
+            self.DS.setWhichVarible(True)
 
         self.ledRing.set(wpilib.Relay.Value.kOn)
 
@@ -148,7 +157,8 @@ class MyRobot(wpilib.IterativeRobot):
         if self.pistonUp.get():
             self.motorWhere = False
         elif self.pistonDown.get():
-            self.firstTime = True
+            #self.firstTime = True
+            self.DS.setFirstTimeVariable(True)
             self.motorWhere = True
 
         if self.gearPistonButton.get():
@@ -163,7 +173,12 @@ class MyRobot(wpilib.IterativeRobot):
         else:
             self.climber.climbNow(self.climbVoltage, directions.Direction.kForward)
 
-        self.driveStraight()
+        #self.driveStraight()
+        if self.controlSwitch.get():
+            self.DS.PressButton()
+            
+        self.DS.driveStraight()
+
         self.vibrator.runVibrate()
         self.alignGear()
 
@@ -215,6 +230,7 @@ class MyRobot(wpilib.IterativeRobot):
             if self.rotationXbox < .15 and self.rotationXbox > -.15:
                 self.rotationXbox=0
             self.Drive.setPIDenable(False)
+
 
     def alignGear(self):
         """
