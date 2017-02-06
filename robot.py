@@ -3,7 +3,7 @@ import wpilib
 import wpilib.buttons
 import ctre
 from components import drive, climb, directions
-from misc import vibrator, matchTime
+from misc import vibrator, matchTime, driveStraight
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
@@ -95,8 +95,11 @@ class MyRobot(wpilib.IterativeRobot):
         self.vibrateTimer.start()
 
         self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
-
-
+        
+        """
+        Drive Straight
+        """
+        self.DS = driveStraight.driveStraight()
 
         self.components = {
             'drive': self.Drive
@@ -182,9 +185,11 @@ class MyRobot(wpilib.IterativeRobot):
             print ("something bad happened")
 
     def driveStraight(self):
-        """
-            Drive Straight Algorithm to allow mecanums to fly free
-        """
+        
+        
+        
+        
+"""
         if self.controlSwitch.get():
             self.whichMethod = not self.whichMethod
             if self.whichMethod:
@@ -195,9 +200,6 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.rotationXbox = (self.joystick.getRawAxis(4))*.5
 
-        """
-        This toggles between PID control and manual control
-        """
         if self.whichMethod:
             if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
                 if self.timer.hasPeriodPassed(.5):
@@ -212,7 +214,7 @@ class MyRobot(wpilib.IterativeRobot):
         else:
             if self.rotationXbox < .15 and self.rotationXbox > -.15:
                 self.rotationXbox=0
-
+"""
     def alignGear(self):
         """
             This is very experimental and is just a test to see if mecanums can work
