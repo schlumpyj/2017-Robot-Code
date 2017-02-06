@@ -41,9 +41,9 @@ class driveStraight(object):
       
     self.rotationXbox = (self.joystick.getRawAxis(4))*.5
 
-        
+        """
         This toggles between PID control and manual control
-        
+        """
         if self.whichMethod:
             if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
                 if self.timer.hasPeriodPassed(.5):
