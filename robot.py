@@ -196,6 +196,42 @@ class MyRobot(wpilib.IterativeRobot):
 
             print ("something bad happened")
 
+    def driveStraight(self):
+        """
+            Drive Straight Algorithm to allow mecanums to fly free
+        """
+        if self.controlSwitch.get():
+            self.whichMethod = not self.whichMethod
+            if self.whichMethod:
+                self.vibrator.start(2)
+            else:
+                self.vibrator.start(1)
+            self.firstTime = True
+
+        self.rotationXbox = (self.joystick.getRawAxis(4))*.5
+
+        """
+        This toggles between PID control and manual control
+        """
+        if self.whichMethod:
+            if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
+                if self.timer.hasPeriodPassed(.5):
+                    self.Drive.updateSetpoint()
+                    self.firstTime = False
+                    print ("yo Im here")
+            elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
+                self.Drive.setPIDenable(True)
+                print ("I is here my boi")
+            else:
+                self.timer.reset()
+                self.Drive.setPIDenable(False)
+                self.firstTime = True
+        else:
+            if self.rotationXbox < .15 and self.rotationXbox > -.15:
+                self.rotationXbox=0
+            self.Drive.setPIDenable(False)
+
+
     def alignGear(self):
         """
             This is very experimental and is just a test to see if mecanums can work
