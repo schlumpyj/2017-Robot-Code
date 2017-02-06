@@ -203,15 +203,18 @@ class MyRobot(wpilib.IterativeRobot):
                 if self.timer.hasPeriodPassed(.5):
                     self.Drive.updateSetpoint()
                     self.firstTime = False
+                    print ("yo Im here")
             elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
                 self.Drive.setPIDenable(True)
+                print ("I is here my boi")
             else:
                 self.timer.reset()
-                self.Drive.setPIDenable(True)
+                self.Drive.setPIDenable(False)
                 self.firstTime = True
         else:
             if self.rotationXbox < .15 and self.rotationXbox > -.15:
                 self.rotationXbox=0
+            self.Drive.setPIDenable(False)
 
     def alignGear(self):
         """
