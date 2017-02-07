@@ -12,12 +12,6 @@ import networktables
 
 class MyRobot(wpilib.IterativeRobot):
 
-    """
-        TODO:
-            Clean up Drive Straight function if possible
-    """
-
-
     def robotInit(self):
         """
         Motors
@@ -132,7 +126,7 @@ class MyRobot(wpilib.IterativeRobot):
             Makes sure the piston is where we think it is
         """
         #self.whichMethod = True
-        self.DS.setWhichVarible(True)
+        self.DS.setWhichVariable(True)
         #self.firstTime = True
         self.DS.setFirstTimeVariable(True)
         self.timer.reset()
@@ -178,7 +172,6 @@ class MyRobot(wpilib.IterativeRobot):
             self.DS.PressButton()
             
         self.DS.driveStraight()
-
         self.vibrator.runVibrate()
         self.alignGear()
 
@@ -195,42 +188,6 @@ class MyRobot(wpilib.IterativeRobot):
         else:
 
             print ("something bad happened")
-
-    def driveStraight(self):
-        """
-            Drive Straight Algorithm to allow mecanums to fly free
-        """
-        if self.controlSwitch.get():
-            self.whichMethod = not self.whichMethod
-            if self.whichMethod:
-                self.vibrator.start(2)
-            else:
-                self.vibrator.start(1)
-            self.firstTime = True
-
-        self.rotationXbox = (self.joystick.getRawAxis(4))*.5
-
-        """
-        This toggles between PID control and manual control
-        """
-        if self.whichMethod:
-            if self.rotationXbox < .15 and self.rotationXbox > -.15 and self.firstTime:
-                if self.timer.hasPeriodPassed(.5):
-                    self.Drive.updateSetpoint()
-                    self.firstTime = False
-                    print ("yo Im here")
-            elif self.rotationXbox < .15 and self.rotationXbox > -.15 and not self.firstTime:
-                self.Drive.setPIDenable(True)
-                print ("I is here my boi")
-            else:
-                self.timer.reset()
-                self.Drive.setPIDenable(False)
-                self.firstTime = True
-        else:
-            if self.rotationXbox < .15 and self.rotationXbox > -.15:
-                self.rotationXbox=0
-            self.Drive.setPIDenable(False)
-
 
     def alignGear(self):
         """
@@ -249,7 +206,6 @@ class MyRobot(wpilib.IterativeRobot):
     def updater(self):
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
-
 
 if __name__=="__main__":
     wpilib.run(MyRobot)
