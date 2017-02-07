@@ -14,6 +14,7 @@ class Drive(object):
         self.gyro = gyro
         self.vision_x = 0
         self.strafe = 0
+        self.rotateAuto = 0
         self.robotDrive = robotDrive
 
         kP = 0.01
@@ -32,28 +33,48 @@ class Drive(object):
         visionController.setInputRange(0.0, 320.0)
         visionController.setOutputRange(-.5, .5)
         visionController.setContinuous(False)
+        visionController.setPercentTolerance(2)
         self.visionController = visionController
         self.visionController.setSetpoint(160.0)
 
+        autoP = 0.03
+
+        autoTurn = wpilib.PIDController(visionP, 0, 0, 0, self.gyro, output=self.autoTurnOutput)
+        autoTurn.setInputRange(-180.0,  180.0)
+        autoTurn.setOutputRange(-.5, .5)
+        autoTurn.setContinuous(True)
+        autoTurn.setPercentTolerance(2)
+        self.autoTurn = autoTurn
+
+
     def mecanumMove(self, x, y, rotation, throttle):
-        
+
         if not self.turnController.isEnable():
-            if rotation < .15 and rotation > -.15:
-                self.rotation = 0
-            else:
-                self.rotation = rotation
+            self.rotation = rotation
+
+        if self.autoTurn.isEnable():
+            self.rotation = self.rotateAuto
 
         self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
-        self.robotDrive.mecanumDrive_Cartesian(throttle*x, -1*self.rotation, throttle*y, 0)
-        
+        self.robotDrive.mecanumDrive_Cartesian(throttle*x, self.rotation, throttle*y, 0)
+
     def tankMove(self, x, y, throttle):
 
         self.drivePiston.set(wpilib.DoubleSolenoid.Value.kReverse)
-        self.robotDrive.arcadeDrive(throttle*y, throttle*x)
+        self.robotDrive.arcadeDrive(throttle*y, throttle*x, True)
 
-    def updateSetpoint(self):
+    def updateSetpoint(self, controller, angle=0):
+        if controller == "turn":
+            self.turnController.setSetpoint(self.gyro.getYaw())
+        elif controller == "auto":
+            self.autoTurn.setSetpoint(angle)
 
-        self.turnController.setSetpoint(self.gyro.getYaw())
+    def enableAutoTurn(self):
+
+        self.autoTurn.enable()
+        if self.autoTurn.onTarget():
+            self.autoTurn.disable()
+            return True
 
     def setPIDenable(self, state):
 
@@ -63,15 +84,19 @@ class Drive(object):
             self.turnController.disable()
             self.rotation = 0
 
-    def pidWrite(self, output):
-
-        self.rotation = output
-
     def engageVisionX(self, value):
 
         self.visionController.enable()
         self.vision_x = value
 
+    def pidWrite(self, output):
+
+        self.rotation = output
+
     def autoAlignOutput(self, output):
 
         self.strafe = output
+
+    def autoTurnOutput(self, output):
+
+        self.rotateAuto = output
