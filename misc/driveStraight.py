@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 #Drive straight in a object based form
-
-
 class driveStraight(object):
-    
+
     def __init__(self, timer, whichMethod, vibrator, firstTime, drive):
 
-        self.timer = timer #main timer 
+        self.timer = timer #main timer
         self.whichMethod = whichMethod #whatever this does?
         self.vibrationClass = vibrator #the instatiated vibration class form the parent file
         self.thereticalButtonPress = False
         self.firstTime = firstTime #set first time varible
         self.Drive = drive #drive passed
-
-        self.rotationXbox = 0
 
     def setWhichVariable(self, var):
         self.whichMethod = var #update
@@ -27,7 +23,7 @@ class driveStraight(object):
     def driveStraight(self, rotationValue):
 
         #On provided button down down
-        if self.thereticalButtonPress = True:
+        if self.thereticalButtonPress == True:
             #set to false
             self.thereticalButtonPress = False
 
