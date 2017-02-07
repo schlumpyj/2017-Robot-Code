@@ -50,6 +50,10 @@ class Drive(object):
     def mecanumMove(self, x, y, rotation, throttle):
 
         if not self.turnController.isEnable():
+            if rotation < .15 and rotation > -.15:
+ -              self.rotation = 0
+ -          else:
+ -              self.rotation = rotation
             self.rotation = rotation
 
         if self.autoTurn.isEnable():
