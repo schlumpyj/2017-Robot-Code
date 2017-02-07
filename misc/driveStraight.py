@@ -6,7 +6,7 @@ class driveStraight(object):
 
         self.timer = timer #main timer
         self.whichMethod = whichMethod #whatever this does?
-        self.vibrationClass = vibrator #the instatiated vibration class form the parent file
+        self.vibrator = vibrator #the instatiated vibration class form the parent file
         self.thereticalButtonPress = False
         self.firstTime = firstTime #set first time varible
         self.Drive = drive #drive passed
