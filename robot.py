@@ -3,7 +3,7 @@ import wpilib
 import wpilib.buttons
 import ctre
 from components import drive, climb, directions
-from misc import vibrator, matchTime, driveStraight
+from misc import vibrator, matchTime, driveStraight, alignGear
 from robotpy_ext.common_drivers import units, navx
 from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
@@ -107,7 +107,7 @@ class MyRobot(wpilib.IterativeRobot):
         The great NetworkTables part
         """
         self.vision_table = NetworkTable.getTable('/GRIP/myContoursReport')
-        self.vision_x= 0
+        self.alignGear = alignGear.AlignGear(self.vision_table)
         self.robotStats = NetworkTable.getTable('SmartDashboard')
         self.matchTime = matchTime.MatchTime(self.timer, self.robotStats)
         self.updater()
@@ -172,6 +172,9 @@ class MyRobot(wpilib.IterativeRobot):
         if self.controlSwitch.get():
             self.DS.PressButton()
             
+        if self.visionEnable.get():
+            self.Drive.engageVisionX(self.alignGear.getAlignNumber())
+            
         self.DS.driveStraight(self.rotationXbox)
         self.vibrator.runVibrate()
         self.alignGear()
@@ -189,21 +192,7 @@ class MyRobot(wpilib.IterativeRobot):
         else:
 
             print ("something bad happened")
-
-    def alignGear(self):
-        """
-            This is very experimental and is just a test to see if mecanums can work
-        """
-        try:
-            if wpilib.RobotBase.isSimulation():
-                self.vision_x=250
-            else:
-                self.vision_x = self.vision_table.getNumber('centerX', 0)
-            if self.visionEnable.get():
-                self.Drive.engageVisionX(self.vision_x)
-        except KeyError:
-            pass
-
+            
     def updater(self):
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
