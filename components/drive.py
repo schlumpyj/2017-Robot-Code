@@ -45,7 +45,7 @@ class Drive(object):
 
         self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
         self.robotDrive.mecanumDrive_Cartesian(throttle*x, -1*self.rotation, throttle*y, 0)
-        #self.robodrive.mecanumDrive_Cartesian((self.total*-1*self.joystick.getX()), -1*self.rotationXbox, (self.total*self.joystick.getY()), 0)
+        
     def tankMove(self, x, y, throttle):
 
         self.drivePiston.set(wpilib.DoubleSolenoid.Value.kReverse)
@@ -54,7 +54,7 @@ class Drive(object):
     def updateSetpoint(self):
 
         self.turnController.setSetpoint(self.gyro.getYaw())
-        print (self.gyro.getYaw())
+
     def setPIDenable(self, state):
 
         if state:
