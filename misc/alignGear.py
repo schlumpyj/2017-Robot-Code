@@ -1,4 +1,4 @@
-from networktables import Networktables
+from networktables import Networktable
 
 class AlignGear(object):
     
