@@ -36,9 +36,12 @@ class Drive(object):
         self.visionController.setSetpoint(160.0)
 
     def mecanumMove(self, x, y, rotation, throttle):
-
+        
         if not self.turnController.isEnable():
-            self.rotation = rotation
+            if rotation < .15 and rotation > -.15:
+                self.rotation = 0
+            else:
+                self.rotation = rotation
 
         self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
         self.robotDrive.mecanumDrive_Cartesian(throttle*x, -1*self.rotation, throttle*y, 0)
