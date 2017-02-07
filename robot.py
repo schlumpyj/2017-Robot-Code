@@ -159,8 +159,9 @@ class MyRobot(wpilib.IterativeRobot):
             self.gearPiston.set(True)
         else:
             self.gearPiston.set(False)
-
-
+            
+        self.rotationXbox = (self.joystick.getRawAxis(4))*.5
+        
         self.climbVoltage = self.joystick.getRawAxis(2)
         if (self.climbReverseButton.get()):
             self.climber.climbNow(self.climbVoltage, directions.Direction.kReverse)
@@ -171,7 +172,7 @@ class MyRobot(wpilib.IterativeRobot):
         if self.controlSwitch.get():
             self.DS.PressButton()
             
-        self.DS.driveStraight()
+        self.DS.driveStraight(self.rotationXbox)
         self.vibrator.runVibrate()
         self.alignGear()
 
@@ -182,7 +183,7 @@ class MyRobot(wpilib.IterativeRobot):
             self.Drive.tankMove(-1*self.joystick.getX(), self.joystick.getY(), self.throttle)
 
         elif self.motorWhere==True: # Mecanum
-
+            
             self.Drive.mecanumMove((-1*self.joystick.getX()),self.joystick.getY(), self.rotationXbox, self.throttle)
 
         else:
