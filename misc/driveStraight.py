@@ -4,14 +4,13 @@
 
 class driveStraight(object):
     
-    def __init__(self, timer, whichMethod, vibrator, firstTime, joystick, drive):
+    def __init__(self, timer, whichMethod, vibrator, firstTime, drive):
 
         self.timer = timer #main timer 
         self.whichMethod = whichMethod #whatever this does?
         self.vibrationClass = vibrator #the instatiated vibration class form the parent file
         self.thereticalButtonPress = False
         self.firstTime = firstTime #set first time varible
-        self.joystick = joystick #the joystick
         self.Drive = drive #drive passed
 
         self.rotationXbox = 0
