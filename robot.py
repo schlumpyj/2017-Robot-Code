@@ -93,7 +93,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Drive Straight
         """
-        self.DS = driveStraight.driveStraight(self.timer,self.whichMethod,self.vibrator,self.firstTime,self.joystick,self.Drive)
+        self.DS = driveStraight.driveStraight(self.timer, self.whichMethod, self.vibrator, self.firstTime, self.Drive)
         
         
         
