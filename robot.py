@@ -177,7 +177,6 @@ class MyRobot(wpilib.IterativeRobot):
             
         self.DS.driveStraight(self.rotationXbox)
         self.vibrator.runVibrate()
-        self.alignGear()
 
         self.throttle = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
 
