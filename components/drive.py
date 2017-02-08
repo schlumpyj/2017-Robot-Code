@@ -101,7 +101,15 @@ class Drive(object):
         else:
             self.visionController.disable()
 
+    def visionOnTarget(self):
+
+        if self.visionController.onTarget():
+
+            print ("Im on target!")
+            return True
+
     def disableVision(self):
+
         self.visionController.disable()
 
     def pidWrite(self, output):
