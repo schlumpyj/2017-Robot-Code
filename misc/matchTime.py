@@ -1,5 +1,3 @@
-import wpilib
-from networktables import NetworkTables
 class MatchTime(object):
 
     def __init__(self, timer, table):
