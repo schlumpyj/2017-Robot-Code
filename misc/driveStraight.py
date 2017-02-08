@@ -40,7 +40,7 @@ class driveStraight(object):
         if self.whichMethod:
             if rotationValue < .15 and rotationValue > -.15 and self.firstTime:
                 if self.timer.hasPeriodPassed(.5):
-                    self.Drive.updateSetpoint()
+                    self.Drive.updateSetpoint("teleop")
                     self.firstTime = False
             elif rotationValue < .15 and rotationValue > -.15 and not self.firstTime:
                 self.Drive.setPIDenable(True)
