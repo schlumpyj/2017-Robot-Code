@@ -1,14 +1,14 @@
-from networktables import Networktable
+from networktables import NetworkTable
 
 class AlignGear(object):
-    
+
     def __init__(self, table):
-        
+
         self.vision_x = 0
         self.table = table
-        
+
     def getAlignNumber(self):
-    
+
         try:
             if wpilib.RobotBase.isSimulation():
                 self.vision_x=250
