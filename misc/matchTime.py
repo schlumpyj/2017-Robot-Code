@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 class MatchTime(object):
 
     def __init__(self, timer, table):
