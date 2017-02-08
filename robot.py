@@ -41,24 +41,26 @@ class MyRobot(wpilib.IterativeRobot):
         self.psiSensor = wpilib.AnalogInput(0)
         self.powerBoard = wpilib.PowerDistributionPanel(0) #Might need or not
 
-        self.joystick = wpilib.Joystick(0) #Should be xbox controller
+        self.joystick = wpilib.Joystick(0) #xbox controller
 
         """
         Buttons
         """
         self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #left bumper
         self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #right bumper
-        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 3) #X button
+        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 2) #X button
         self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 1)
+        self.safetyPistonButton = wpilib.buttons.JoystickButton(self.joystick, 3)
         #Controll switch init for auto lock direction
         self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5)
 
         #Button for slow reverse out of climb
-        self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,2)
+        self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,4)
 
 
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
         self.gearPiston = wpilib.Solenoid(2)
+        self.safetyPiston = wpilib.Solenoid(1)
 
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
 
@@ -70,14 +72,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         self.motorWhere = True #IF IT IS IN MECANUM BY DEFAULT
         self.rotationXbox = 0
-        self.rotationPID = 0
-        self.firstTime = True
-        self.testingAngle = 0
         self.climbVoltage = 0
-        self.whichMethod = True
-        self.vibrateState = 4
-        self.driveViState = 1
-        self.strafe_calc = 0
 
         """
         Timers
@@ -89,13 +84,11 @@ class MyRobot(wpilib.IterativeRobot):
         self.vibrateTimer.start()
 
         self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
-        
+
         """
         Drive Straight
         """
-        self.DS = driveStraight.driveStraight(self.timer, self.whichMethod, self.vibrator, self.firstTime, self.Drive)
-        
-        
+        self.DS = driveStraight.driveStraight(self.timer, self.vibrator, self.Drive)
 
         """
         The great NetworkTables part
@@ -104,7 +97,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.alignGear = alignGear.AlignGear(self.vision_table)
         self.robotStats = NetworkTable.getTable('SmartDashboard')
         self.matchTime = matchTime.MatchTime(self.timer, self.robotStats)
-                
+
         self.components = {
             'drive': self.Drive,
             'alignGear': self.alignGear
@@ -115,6 +108,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.updater()
 
     def autonomousInit(self):
+
         self.ledRing.set(wpilib.Relay.Value.kOn)
         self.matchTime.startMode(isAuto=True)
 
@@ -127,9 +121,8 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Makes sure the piston is where we think it is
         """
-        #self.whichMethod = True
+        self.ledRing.set(wpilib.Relay.Value.kOn) #I don't think it needs to be in the teleopPeriodic
         self.DS.setWhichVariable(True)
-        #self.firstTime = True
         self.Drive.updateSetpoint("teleop")
         self.Drive.disableVision()
         self.DS.setFirstTimeVariable(True)
@@ -143,19 +136,14 @@ class MyRobot(wpilib.IterativeRobot):
         self.matchTime.pushTime()
 
         if self.visionEnable.get():
-            #self.firstTime = True
             self.DS.setFirstTimeVariable(True)
-            #self.whichMethod = True
             self.DS.setWhichVariable(True)
-
-        self.ledRing.set(wpilib.Relay.Value.kOn)
 
         self.updater()
 
         if self.pistonUp.get():
             self.motorWhere = False
         elif self.pistonDown.get():
-            #self.firstTime = True
             self.DS.setFirstTimeVariable(True)
             self.motorWhere = True
 
@@ -163,23 +151,28 @@ class MyRobot(wpilib.IterativeRobot):
             self.gearPiston.set(True)
         else:
             self.gearPiston.set(False)
-            
+
+        if self.safetyPistonButton.get():
+            self.safetyPiston.set(False)
+        else:
+            self.safetyPiston.set(True)
+
         self.rotationXbox = (self.joystick.getRawAxis(4))*.5
-        
+
         self.climbVoltage = self.joystick.getRawAxis(2)
         if (self.climbReverseButton.get()):
             self.climber.climbNow(self.climbVoltage, directions.Direction.kReverse)
         else:
             self.climber.climbNow(self.climbVoltage, directions.Direction.kForward)
 
-        #self.driveStraight()
         if self.controlSwitch.get():
             self.DS.PressButton()
-            
+
         if self.visionEnable.get():
             self.Drive.engageVisionX(True, self.alignGear.getAlignNumber())
         else:
-            self.Drive.engageVisionX(False, self.alignGear.getAlignNumber())
+            self.Drive.disableVision()
+
         self.DS.driveStraight(self.rotationXbox)
         self.vibrator.runVibrate()
 
@@ -190,13 +183,17 @@ class MyRobot(wpilib.IterativeRobot):
             self.Drive.tankMove(-1*self.joystick.getX(), self.joystick.getY(), self.throttle)
 
         elif self.motorWhere==True: # Mecanum
-            
+
             self.Drive.mecanumMove((-1*self.joystick.getX()),self.joystick.getY(), self.rotationXbox, self.throttle)
 
         else:
 
             print ("something bad happened")
-            
+
+    def disabledPeriodic(self):
+
+        self.updater()
+
     def updater(self):
 
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
