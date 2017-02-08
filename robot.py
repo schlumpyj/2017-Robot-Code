@@ -96,13 +96,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.DS = driveStraight.driveStraight(self.timer, self.whichMethod, self.vibrator, self.firstTime, self.Drive)
         
         
-        
-        self.components = {
-            'drive': self.Drive
-        }
 
-        self.automodes = AutonomousModeSelector('autonomous',
-                                        self.components)
         """
         The great NetworkTables part
         """
@@ -110,10 +104,18 @@ class MyRobot(wpilib.IterativeRobot):
         self.alignGear = alignGear.AlignGear(self.vision_table)
         self.robotStats = NetworkTable.getTable('SmartDashboard')
         self.matchTime = matchTime.MatchTime(self.timer, self.robotStats)
+                
+        self.components = {
+            'drive': self.Drive,
+            'alignGear': self.alignGear
+        }
+
+        self.automodes = AutonomousModeSelector('autonomous',
+                                        self.components)
         self.updater()
 
     def autonomousInit(self):
-
+        self.ledRing.set(wpilib.Relay.Value.kOn)
         self.matchTime.startMode(isAuto=True)
 
     def autonomousPeriodic(self):
@@ -128,6 +130,8 @@ class MyRobot(wpilib.IterativeRobot):
         #self.whichMethod = True
         self.DS.setWhichVariable(True)
         #self.firstTime = True
+        self.Drive.updateSetpoint("teleop")
+        self.Drive.disableVision()
         self.DS.setFirstTimeVariable(True)
         self.timer.reset()
         self.matchTime.startMode(isAuto=False)
@@ -142,7 +146,7 @@ class MyRobot(wpilib.IterativeRobot):
             #self.firstTime = True
             self.DS.setFirstTimeVariable(True)
             #self.whichMethod = True
-            self.DS.setWhichVarible(True)
+            self.DS.setWhichVariable(True)
 
         self.ledRing.set(wpilib.Relay.Value.kOn)
 
@@ -173,8 +177,9 @@ class MyRobot(wpilib.IterativeRobot):
             self.DS.PressButton()
             
         if self.visionEnable.get():
-            self.Drive.engageVisionX(self.alignGear.getAlignNumber())
-            
+            self.Drive.engageVisionX(True, self.alignGear.getAlignNumber())
+        else:
+            self.Drive.engageVisionX(False, self.alignGear.getAlignNumber())
         self.DS.driveStraight(self.rotationXbox)
         self.vibrator.runVibrate()
 
