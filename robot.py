@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import wpilib
 import wpilib.buttons
-import ctre
 from components import drive, climb, directions
 from misc import vibrator, matchTime, driveStraight, alignGear
 from robotpy_ext.common_drivers import units, navx
@@ -17,6 +16,7 @@ class MyRobot(wpilib.IterativeRobot):
         Motors
         """
         if not wpilib.RobotBase.isSimulation():
+            import ctre
             self.motor1 = ctre.CANTalon(1) #Drive Motors
             self.motor2 = ctre.CANTalon(2)
             self.motor3 = ctre.CANTalon(3)
