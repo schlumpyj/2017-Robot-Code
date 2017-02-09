@@ -10,7 +10,7 @@ def main():
     camera = cs.startAutomaticCapture()
 
     camera.setResolution(320, 240)
-
+    camera.setFPS(20)
     # Get a CvSink. This will capture images from the camera
     cvSink = cs.getVideo()
 
