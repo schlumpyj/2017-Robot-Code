@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import wpilib
 import wpilib.buttons
-#import ctre
+import ctre
 from components import drive, climb, directions
 from misc import vibrator, matchTime, driveStraight, alignGear
 from robotpy_ext.common_drivers import units, navx
