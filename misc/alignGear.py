@@ -1,5 +1,6 @@
 from networktables import NetworkTable
-
+import wpilib
+import wpilib.buttons
 class AlignGear(object):
 
     def __init__(self, table):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import wpilib
 import wpilib.buttons
-import ctre
+#import ctre
 from components import drive, climb, directions
 from misc import vibrator, matchTime, driveStraight, alignGear
 from robotpy_ext.common_drivers import units, navx
@@ -47,13 +47,15 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Buttons
         """
-        self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #left bumper
-        self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #right bumper
+        #self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #left bumper
+        #self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #right bumper
         self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 2) #X button
-        self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 1)
+        self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 6)
         self.safetyPistonButton = wpilib.buttons.JoystickButton(self.joystick, 3)
         #Controll switch init for auto lock direction
         self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5)
+        #for drive toggle
+        self.driveControlButton = button_debouncer.ButtonDebouncer(self.joystick,5, period=0.5)
 
         #Button for slow reverse out of climb
         self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,4)
@@ -74,7 +76,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.motorWhere = True #IF IT IS IN MECANUM BY DEFAULT
         self.rotationXbox = 0
         self.climbVoltage = 0
-
         """
         Timers
         """
@@ -143,11 +144,14 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.updater()
 
-        if self.pistonUp.get():
-            self.motorWhere = False
-        elif self.pistonDown.get():
-            self.DS.setFirstTimeVariable(True)
-            self.motorWhere = True
+        if (self.driveControlButton.get()):
+
+            if(self.motorWhere == False):
+
+                self.motorWhere = True
+
+            else:
+                self.motorWhere = False
 
         if self.gearPistonButton.get():
             self.gearPiston.set(True)
