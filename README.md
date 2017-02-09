@@ -11,7 +11,7 @@ Authored by the great Josh and Caleb programming team
 
 Powered By The Following:
 
- -Python 3 (the updated version of 2.7 , just thought id add that for 2.7 users like me)  
+ -Python 3 (the updated version of 2.7 , just thought I would add that for 2.7 users like me)  
  -Bugs  
  -Unintended Features (see item 2, Bugs.)  
  -Bad ideas (always need to include a few of these)  
