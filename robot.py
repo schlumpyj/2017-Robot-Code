@@ -121,6 +121,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Makes sure the piston is where we think it is
         """
+        print (self.Drive.getSetpoint())
         self.ledRing.set(wpilib.Relay.Value.kOn) #I don't think it needs to be in the teleopPeriodic
         self.DS.setWhichVariable(True)
         self.Drive.updateSetpoint("teleop")
@@ -128,7 +129,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.DS.setFirstTimeVariable(True)
         self.timer.reset()
         self.matchTime.startMode(isAuto=False)
-
+        print (self.Drive.getSetpoint())
     def teleopPeriodic(self):
         """
             Human controlled period

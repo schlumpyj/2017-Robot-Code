@@ -101,6 +101,9 @@ class Drive(object):
         else:
             self.visionController.disable()
 
+    def getSetpoint(self):
+        return self.turnController.getSetpoint()
+
     def visionOnTarget(self):
 
         if self.visionController.onTarget():
