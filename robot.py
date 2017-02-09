@@ -43,6 +43,7 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.joystick = wpilib.Joystick(0) #xbox controller
 
+        wpilib.CameraServer.launch('misc/vision.py:main')
         """
         Buttons
         """
