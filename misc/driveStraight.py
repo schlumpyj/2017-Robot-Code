@@ -2,7 +2,7 @@
 #Drive straight in a object based form
 class driveStraight(object):
 
-    def __init__(self, timer, vibrator, drive):
+    def __init__(self, timer, vibrator, drive, table):
 
         self.timer = timer #main timer
         self.whichMethod = True #whatever this does?
@@ -10,6 +10,7 @@ class driveStraight(object):
         self.thereticalButtonPress = False
         self.firstTime = True #set first time varible
         self.Drive = drive #drive passed
+        self.table = table
 
     def setWhichVariable(self, var):
         self.whichMethod = var #update
@@ -48,6 +49,7 @@ class driveStraight(object):
                 self.timer.reset()
                 self.Drive.setPIDenable(False)
                 self.firstTime = True
+            self.table.putString("isLock", "locked")
         else:
-
+            self.table.putString("isLock", "notLocked")
             self.Drive.setPIDenable(False)

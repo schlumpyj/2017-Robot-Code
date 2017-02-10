@@ -85,10 +85,7 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
 
-        """
-        Drive Straight
-        """
-        self.DS = driveStraight.driveStraight(self.timer, self.vibrator, self.Drive)
+
 
         """
         The great NetworkTables part
@@ -97,6 +94,11 @@ class MyRobot(wpilib.IterativeRobot):
         self.alignGear = alignGear.AlignGear(self.vision_table)
         self.robotStats = NetworkTable.getTable('SmartDashboard')
         self.matchTime = matchTime.MatchTime(self.timer, self.robotStats)
+
+        """
+        Drive Straight
+        """
+        self.DS = driveStraight.driveStraight(self.timer, self.vibrator, self.Drive, self.robotStats)
 
         self.components = {
             'drive': self.Drive,
@@ -177,11 +179,11 @@ class MyRobot(wpilib.IterativeRobot):
         self.throttle = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
 
         if self.motorWhere==False:
-
+            self.robotStats.putString("State", "tank")
             self.Drive.tankMove(-1*self.joystick.getX(), self.joystick.getY(), self.throttle)
 
         elif self.motorWhere==True: # Mecanum
-
+            self.robotStats.putString("State", "mecanum")
             self.Drive.mecanumMove((-1*self.joystick.getX()),self.joystick.getY(), self.rotationXbox, self.throttle)
 
         else:
@@ -192,7 +194,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.updater()
 
     def updater(self):
-
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 
 if __name__=="__main__":
