@@ -47,9 +47,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Buttons
         """
-        #self.pistonDown = wpilib.buttons.JoystickButton(self.joystick, 6) #left bumper
-        #self.pistonUp = wpilib.buttons.JoystickButton(self.joystick, 5) #right bumper
-        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 2) #X button
+        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 4) #X button
         self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 6)
         self.safetyPistonButton = wpilib.buttons.JoystickButton(self.joystick, 3)
         #Controll switch init for auto lock direction
@@ -58,7 +56,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.driveControlButton = button_debouncer.ButtonDebouncer(self.joystick,5, period=0.5)
 
         #Button for slow reverse out of climb
-        self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,4)
+        self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,2)
 
 
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
@@ -145,13 +143,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.updater()
 
         if (self.driveControlButton.get()):
-
-            if(self.motorWhere == False):
-
-                self.motorWhere = True
-
-            else:
-                self.motorWhere = False
+            self.motorWhere = not self.motorWhere
 
         if self.gearPistonButton.get():
             self.gearPiston.set(True)
@@ -193,7 +185,6 @@ class MyRobot(wpilib.IterativeRobot):
             self.Drive.mecanumMove((-1*self.joystick.getX()),self.joystick.getY(), self.rotationXbox, self.throttle)
 
         else:
-
             print ("something bad happened")
 
     def disabledPeriodic(self):
