@@ -178,9 +178,10 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.throttle = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
 
-        if self.motorWhere==False:
+        if self.motorWhere==False: #tank
             self.robotStats.putString("State", "tank")
             self.Drive.tankMove(-1*self.joystick.getX(), self.joystick.getY(), self.throttle)
+            self.Drive.updateSetpoint("teleop") #should fix angle error
 
         elif self.motorWhere==True: # Mecanum
             self.robotStats.putString("State", "mecanum")
