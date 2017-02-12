@@ -1,7 +1,7 @@
 import cv2
 import numpy
 import math
-from networktables import NetworkTables
+from networktables import NetworkTable
 
 class GripPipeline:
     """
@@ -11,9 +11,9 @@ class GripPipeline:
     def __init__(self):
         """initializes all values to presets or None if need to be set
         """
-        NetworkTables.initialize(server='10.44.80.2') #Current Roborio address
-        NetworkTables.setUpdateRate(.02)
-        self.numberPublish = NetworkTables.getTable('/GRIP/myContoursReport')
+        NetworkTable.initialize(server='10.44.80.2') #Current Roborio address
+        NetworkTable.setUpdateRate(.02)
+        self.numberPublish = NetworkTable.getTable('/GRIP/myContoursReport')
 
         self.__hsl_threshold_hue = [56.6546762589928, 83.28925638990128]
         self.__hsl_threshold_saturation = [229.31654676258992, 255.0]

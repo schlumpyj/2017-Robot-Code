@@ -2,6 +2,7 @@
 from networktables import NetworkTable
 import pigpio
 import time
+import colorsys
 
 #Some constants for pins
 RED_PIN   = 17
@@ -9,11 +10,9 @@ GREEN_PIN = 22
 BLUE_PIN  = 24
 
 pi = pigpio.pi()
-try:
-    NetworkTables.initialize(server='10.44.80.2')
-    table = NetworkTables.getTable('/SmartDasboard')
-except:
-    pass
+
+NetworkTable.initialize(server='10.44.80.2')
+table = NetworkTable.getTable('/SmartDasboard')
 
 def setLights(pin, brightness):
 	realBrightness = int(int(brightness) * (float(bright) / 255.0))
@@ -23,10 +22,7 @@ cancel = False
 isUp = False
 isGear = False
 isEnabled = False
-REDcounter = 0
-BLUEcounter = 0
-GREENcounter = 0
-states = 0
+counter = 0
 
 while not cancel:
 
@@ -63,22 +59,13 @@ while not cancel:
                 setLights(BLUE_PIN, 255)
                 setLights(GREEN_PIN, 0)
     else:
-
-        if states == 0:
-            REDCounter +=.01
-            BLUECounter +=.01
-            if REDCounter > 254:
-                BLUECounter = 100
-                REDCounter = 100
-                states = 1
-        if states == 1:
-            GREENcounter = 0
-            BLUECounter = 0
-            REDCounter = 0
-
-        setLights(RED_PIN, REDCounter)
-        setLights(BLUE_PIN, BLUECounter)
-        setLights(GREEN_PIN, GREENcounter)
+        counter+=.01
+        if counter > .99:
+            counter = 0
+        output = colorsys.hsv_to_rgb(counter, .5, .5)
+        setLights(RED_PIN, output[0])
+        setLights(GREEN_PIN, output[1])
+        setLights(BLUE_PIN, output[2])
 
 
 pi.stop()
