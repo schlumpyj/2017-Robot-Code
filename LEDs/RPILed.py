@@ -32,8 +32,8 @@ def setLights(pin, brightness):
 	pi.set_PWM_dutycycle(pin, realBrightness)
 
 cancel = False
-isUp = False
-isGear = False
+isUp = "mecanum"
+isGear = "nope"
 isEnabled = False
 counter = 0
 
@@ -41,22 +41,22 @@ while not cancel:
 
     try:
         try:
-            isUp = table.getBoolean("State", True)
-            isGear = table.getBoolean("Gear", False)
+            isUp = table.getString("State", "mecanum")
+            isGear = table.getString("Gear", "nope")
             isEnabled = table.getBoolean("enabled", False)
         except KeyError:
             pass
 
     if isEnabled:
 
-        if isGear:
+        if isGear == "yep":
             setLights(RED_PIN, 0)
             setLights(BLUE_PIN, 0)
             setLights(GREEN_PIN, 255)
 
         else:
 
-            if isUp:
+            if isUp == "mecanum":
 
                 setLights(RED_PIN, 0)
                 setLights(BLUE_PIN, 0)

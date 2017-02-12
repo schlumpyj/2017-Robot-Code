@@ -95,6 +95,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.robotStats = NetworkTable.getTable('SmartDashboard')
         self.matchTime = matchTime.MatchTime(self.timer, self.robotStats)
 
+        self.robotStats.putBoolean("enabled", False)
+        self.robotStats.putString("Gear", "nope")
         """
         Drive Straight
         """
@@ -113,6 +115,7 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.ledRing.set(wpilib.Relay.Value.kOn)
         self.matchTime.startMode(isAuto=True)
+        self.robotStats.putBoolean("enabled", True)
 
     def autonomousPeriodic(self):
 
@@ -123,7 +126,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Makes sure the piston is where we think it is
         """
-        print (self.Drive.getSetpoint())
+
         self.ledRing.set(wpilib.Relay.Value.kOn) #I don't think it needs to be in the teleopPeriodic
         self.DS.setWhichVariable(True)
         self.Drive.updateSetpoint("teleop")
@@ -131,7 +134,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.DS.setFirstTimeVariable(True)
         self.timer.reset()
         self.matchTime.startMode(isAuto=False)
-        print (self.Drive.getSetpoint())
+        self.robotStats.putBoolean("enabled", True)
+
     def teleopPeriodic(self):
         """
             Human controlled period
@@ -195,6 +199,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.updater()
 
     def updater(self):
+        self.robotStats.putBoolean("enabled", False)
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 
 if __name__=="__main__":
