@@ -15,7 +15,7 @@ NetworkTable.initialize(server='10.44.80.2')
 table = NetworkTable.getTable('/SmartDasboard')
 
 def setLights(pin, brightness):
-	realBrightness = int(int(brightness) * (float(bright) / 255.0))
+	realBrightness = int(int(brightness) * (float(255) / 255.0))
 	pi.set_PWM_dutycycle(pin, realBrightness)
 
 cancel = False
@@ -33,10 +33,6 @@ while not cancel:
             isEnabled = table.getBoolean("enabled", False)
         except KeyError:
             pass
-
-    except KeyboardInterrupt:
-
-        cancel = True
 
     if isEnabled:
 
@@ -59,13 +55,19 @@ while not cancel:
                 setLights(BLUE_PIN, 255)
                 setLights(GREEN_PIN, 0)
     else:
-        counter+=.01
-        if counter > .99:
+        counter+=.00005
+        if counter > 1.00:
             counter = 0
-        output = colorsys.hsv_to_rgb(counter, .5, .5)
-        setLights(RED_PIN, output[0])
-        setLights(GREEN_PIN, output[1])
-        setLights(BLUE_PIN, output[2])
+        output = colorsys.hsv_to_rgb(counter, 1, 1)
+        setLights(RED_PIN, (output[0]*255))
+        setLights(GREEN_PIN, (output[1]*255))
+        setLights(BLUE_PIN, (output[2]*255))
 
 
+    except KeyboardInterrupt:
+
+        cancel = True
+setLights(RED_PIN, 0)
+setLights(GREEN_PIN, 0)
+setLights(BLUE_PIN, 0)
 pi.stop()
