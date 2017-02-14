@@ -10,79 +10,90 @@ Currently, there are these modes programmed:
 - If no gear, tank is down == Pink or Purple
 - If not enabled, cycle through colors
 
+
+TODO:
+- Load on boot
+- Add time.sleep so we don't use so much CPU
+- Add Auto Color maybe
 """
 
 from networktables import NetworkTable
 import pigpio
 import time
 import colorsys
+import sys
 
-#Some constants for pins
-RED_PIN   = 17
-GREEN_PIN = 22
-BLUE_PIN  = 24
+class RPIled(object):
 
-pi = pigpio.pi()
-#should be the server
-NetworkTable.initialize(server='10.44.80.2')
-table = NetworkTable.getTable('/SmartDasboard')
-#neat function for setting the led value
-def setLights(pin, brightness):
-	realBrightness = int(int(brightness) * (float(255) / 255.0))
-	pi.set_PWM_dutycycle(pin, realBrightness)
+	RED_PIN   = 22
+	GREEN_PIN = 17
+	BLUE_PIN  = 24
 
-cancel = False
-isUp = "mecanum"
-isGear = "nope"
-isEnabled = False
-counter = 0
+	def __init__(self):
 
-while not cancel:
+		self.pi = pigpio.pi()
+		NetworkTable.initialize(server='10.44.80.2')
+		self.table = NetworkTable.getTable('SmartDashboard')
+		self.isUp = "mecanum"
+		self.isGear = "nope"
+		self.isEnabled = False
+		self.cancel = False
 
-    try:
-        try:
-            isUp = table.getString("State", "mecanum")
-            isGear = table.getString("Gear", "nope")
-            isEnabled = table.getBoolean("enabled", False)
-        except KeyError:
-            pass
+	def setLights(self, pin, brightness):
+		realBrightness = int(int(brightness) * (float(255) / 255.0))
+		self.pi.set_PWM_dutycycle(pin, realBrightness)
 
-    if isEnabled:
+	def start(self):
 
-        if isGear == "yep":
-            setLights(RED_PIN, 0)
-            setLights(BLUE_PIN, 0)
-            setLights(GREEN_PIN, 255)
+		Thread(target=self.update, args=()).start()
+		return self
 
-        else:
+	def ledGo(self):
+		counter = 0
+		while not self.cancel:
+			try:
+	            isUp = table.getString("State", "mecanum")
+	            isGear = table.getString("Gear", "nope")
+	            isEnabled = table.getBoolean("enabled", False)
+	        except KeyError:
+	            print "KeyError"
 
-            if isUp == "mecanum":
+		    if isEnabled:
 
-                setLights(RED_PIN, 0)
-                setLights(BLUE_PIN, 0)
-                setLights(GREEN_PIN, 255)
+		        if isGear == "yep":
+		            self.setLights(RED_PIN, 0)
+		            self.setLights(BLUE_PIN, 0)
+		            self.setLights(GREEN_PIN, 255)
 
-            else:
+		        else:
 
-                setLights(RED_PIN, 255)
-                setLights(BLUE_PIN, 255)
-                setLights(GREEN_PIN, 0)
-    else:
-        counter+=.00005
-        if counter > 1.00:
-            counter = 0
-        output = colorsys.hsv_to_rgb(counter, 1, 1)
-        setLights(RED_PIN, (output[0]*255))
-        setLights(GREEN_PIN, (output[1]*255))
-        setLights(BLUE_PIN, (output[2]*255))
+		            if isUp == "mecanum":
 
+		                self.setLights(RED_PIN, 0)
+		                self.setLights(BLUE_PIN, 0)
+		                self.setLights(GREEN_PIN, 255)
 
-    except KeyboardInterrupt:
+		            else:
 
-        cancel = True
+		                self.setLights(RED_PIN, 255)
+		                self.setLights(BLUE_PIN, 255)
+		                self.setLights(GREEN_PIN, 0)
+		    else:
+		        counter+=.00005
+		        if counter > 1.00:
+		            counter = 0
+		        output = colorsys.hsv_to_rgb(counter, 1, 1)
+		        self.setLights(RED_PIN, (output[0]*255))
+		        self.setLights(GREEN_PIN, (output[1]*255))
+		        self.setLights(BLUE_PIN, (output[2]*255))
 
-setLights(RED_PIN, 0)
-setLights(GREEN_PIN, 0)
-setLights(BLUE_PIN, 0)
+		time.sleep(.05) #We will see if that effects anything
 
-pi.stop()
+	def stop(self):
+
+		self.cancel = True
+		self.setLights(RED_PIN, 0)
+		self.setLights(GREEN_PIN, 0)
+		self.setLights(BLUE_PIN, 0)
+		self.pi.stop()
+		sys.exit()
