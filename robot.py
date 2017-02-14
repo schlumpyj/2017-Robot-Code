@@ -114,7 +114,6 @@ class MyRobot(wpilib.IterativeRobot):
 
     def autonomousInit(self):
 
-        self.ledRing.set(wpilib.Relay.Value.kOn)
         self.matchTime.startMode(isAuto=True)
         self.robotStats.putBoolean("enabled", True)
 
@@ -122,7 +121,8 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.automodes.run()
         self.matchTime.pushTime()
-
+        self.ledRing.set(wpilib.Relay.Value.kOn)
+        
     def teleopInit(self):
         """
             Makes sure the piston is where we think it is

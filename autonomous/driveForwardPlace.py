@@ -2,7 +2,7 @@ from robotpy_ext.autonomous import StatefulAutonomous, timed_state, state
 
 class DriveForward(StatefulAutonomous):
 
-    MODE_NAME = 'DF Place Gear'
+    MODE_NAME = 'DDF Place Gear'
 
     def initialize(self):
 
