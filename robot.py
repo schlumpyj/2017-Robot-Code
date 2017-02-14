@@ -104,7 +104,8 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.components = {
             'drive': self.Drive,
-            'alignGear': self.alignGear
+            'alignGear': self.alignGear,
+            'gearPiston': self.gearPiston
         }
 
         self.automodes = AutonomousModeSelector('autonomous',
@@ -195,11 +196,11 @@ class MyRobot(wpilib.IterativeRobot):
             print ("something bad happened")
 
     def disabledPeriodic(self):
-
+        self.robotStats.putBoolean("enabled", False)
         self.updater()
 
     def updater(self):
-        self.robotStats.putBoolean("enabled", False)
+
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 
 if __name__=="__main__":
