@@ -7,15 +7,21 @@ class Drive(object):
     My attempt at using OOP
     """
 
-    def __init__(self, robotDrive, drivePiston, gyro):
+    def __init__(self, robotDrive, drivePiston, gyro, encoder):
 
         self.drivePiston = drivePiston
         self.rotation = 0
         self.gyro = gyro
         self.vision_x = 0
         self.strafe = 0
+        self.encoder = encoder
         self.rotateAuto = 0
+        self.forward = 0
         self.robotDrive = robotDrive
+
+        self.encoder.setDistancePerPulse(4)
+        self.encoder.setPIDSourceType(wpilib.Encoder.PIDSourceType.kDisplacement)
+
 
         kP = 0.01
         kI = 0.0001
@@ -39,12 +45,21 @@ class Drive(object):
 
         autoP = 0.1
 
-        autoTurn = wpilib.PIDController(visionP, 0, 0, 0, self.gyro, output=self.autoTurnOutput)
+        autoTurn = wpilib.PIDController(autoP, 0, 0, 0, self.gyro, output=self.autoTurnOutput)
         autoTurn.setInputRange(-180.0,  180.0)
         autoTurn.setOutputRange(-.25, .25)
         autoTurn.setContinuous(True)
         autoTurn.setPercentTolerance(2)
         self.autoTurn = autoTurn
+
+        autoForwardP = 0.1 #I have no idea if this is good enough
+
+        autoForward = wpilib.PIDController(autoForwardP, 0, 0, 0, self.encoder, output=self.autoForwardOutput)
+        autoForward.setInputRange(0, 180.0) #I don't know what to put for the input range
+        autoForward.setOutputRange(-.7, .7)
+        autoForward.setContinuous(False)
+        autoForward.setPercentTolerance(1)
+        self.autoForward = autoForward
 
 
     def mecanumMove(self, x, y, rotation, throttle):
@@ -61,6 +76,9 @@ class Drive(object):
 
         if not self.visionController.isEnable():
             self.strafe = throttle*x
+
+        if not self.autoForward.isEnable():
+            self.forward = throttle*y
 
         self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
         self.robotDrive.mecanumDrive_Cartesian(self.strafe, -1*self.rotation, throttle*y, 0)
@@ -105,6 +123,25 @@ class Drive(object):
     def getAutoSetpoint(self):
         return self.autoTurn.getSetpoint()
 
+    def getCurrentEncoder(self):
+        return self.encoder.getDistance()
+
+    def setAutoForwardSetpoint(self, setpoint):
+
+        self.autoForward.setSetpoint(setpoint):
+
+    def isAutoForwardThere(self):
+
+        if self.autoForward.onTarget():
+            self.autoForward.disable()
+            return True
+
+        else:
+            self.autoForward.enable()
+
+    def disableAutoForward(self):
+        self.autoForward.disable()
+
     def visionOnTarget(self):
 
         if self.visionController.onTarget():
@@ -116,6 +153,7 @@ class Drive(object):
 
         self.visionController.disable()
         self.autoTurn.disable()
+
     def pidWrite(self, output):
 
         self.rotation = output
@@ -127,3 +165,7 @@ class Drive(object):
     def autoTurnOutput(self, output):
 
         self.rotateAuto = output
+
+    def autoForwardOutput(self, output):
+
+        self.forward = output

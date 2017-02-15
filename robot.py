@@ -63,9 +63,11 @@ class MyRobot(wpilib.IterativeRobot):
         self.gearPiston = wpilib.Solenoid(2)
         self.safetyPiston = wpilib.Solenoid(1)
 
+        self.encoder = wpilib.Encoder(2, 3)
+
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
 
-        self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx)
+        self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx, self.encoder)
         self.climber = climb.Climb(self.climb1, self.climb2)
 
         """
@@ -84,9 +86,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.vibrateTimer.start()
 
         self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
-
-        self.encoder = wpilib.Encoder(2, 3)
-        self.encoder.setDistancePerPulse(2)
 
         """
         The great NetworkTables part
@@ -124,7 +123,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.automodes.run()
         self.matchTime.pushTime()
         self.ledRing.set(wpilib.Relay.Value.kOn)
-        
+
     def teleopInit(self):
         """
             Makes sure the piston is where we think it is
