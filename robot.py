@@ -85,7 +85,8 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
 
-
+        self.encoder = wpilib.Encoder(2, 3)
+        self.encoder.setDistancePerPulse(2)
 
         """
         The great NetworkTables part
@@ -143,6 +144,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Human controlled period
         """
+        print (self.encoder.getRate())
         self.matchTime.pushTime()
 
         if self.visionEnable.get():
