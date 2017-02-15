@@ -19,7 +19,7 @@ class Drive(object):
         self.forward = 0
         self.robotDrive = robotDrive
 
-        self.encoder.setDistancePerPulse(4)
+        self.encoder.setDistancePerPulse(.106103)
         self.encoder.setPIDSourceType(wpilib.Encoder.PIDSourceType.kDisplacement)
 
 
@@ -52,13 +52,13 @@ class Drive(object):
         autoTurn.setPercentTolerance(2)
         self.autoTurn = autoTurn
 
-        autoForwardP = 0.1 #I have no idea if this is good enough
+        autoForwardP = 0.02 #I have no idea if this is good enough
 
         autoForward = wpilib.PIDController(autoForwardP, 0, 0, 0, self.encoder, output=self.autoForwardOutput)
         autoForward.setInputRange(0, 180.0) #I don't know what to put for the input range
-        autoForward.setOutputRange(-.7, .7)
+        autoForward.setOutputRange(-.4, .4)
         autoForward.setContinuous(False)
-        autoForward.setPercentTolerance(1)
+        autoForward.setPercentTolerance(.5)
         self.autoForward = autoForward
 
 
@@ -85,7 +85,7 @@ class Drive(object):
             self.forward = throttle*y
 
         self.drivePiston.set(wpilib.DoubleSolenoid.Value.kForward)
-        self.robotDrive.mecanumDrive_Cartesian(self.strafe, -1*self.rotation, throttle*y, 0)
+        self.robotDrive.mecanumDrive_Cartesian(self.strafe, -1*self.rotation, self.forward, 0)
 
     def tankMove(self, x, y, throttle):
 
@@ -107,6 +107,7 @@ class Drive(object):
         if controller == "teleop":
             self.turnController.setSetpoint(self.gyro.getYaw())
         elif controller == "auto":
+            print (angle)
             self.autoTurn.setSetpoint(angle)
 
     def getSetpoint(self):
@@ -196,4 +197,4 @@ class Drive(object):
 
     def autoForwardOutput(self, output):
 
-        self.forward = output
+        self.forward = -1 * output

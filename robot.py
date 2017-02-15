@@ -8,6 +8,7 @@ from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
 from networktables import NetworkTable
 import networktables
+import time
 
 class MyRobot(wpilib.IterativeRobot):
 
@@ -40,6 +41,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.navx = navx.AHRS.create_spi()
         self.psiSensor = wpilib.AnalogInput(0)
         self.powerBoard = wpilib.PowerDistributionPanel(0) #Might need or not
+        self.ultrasonic = wpilib.Ultrasonic(5, 4)
+        self.ultrasonic.setAutomaticMode(True)
 
         self.joystick = wpilib.Joystick(0) #xbox controller
 
@@ -105,7 +108,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.components = {
             'drive': self.Drive,
             'alignGear': self.alignGear,
-            'gearPiston': self.gearPiston
+            'gearPiston': self.gearPiston,
+            'ultrasonic': self.ultrasonic
         }
 
         self.automodes = AutonomousModeSelector('autonomous',
@@ -129,9 +133,9 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Makes sure the piston is where we think it is
         """
-
+        self.Drive.resetEncoder()
         self.ledRing.set(wpilib.Relay.Value.kOn) #I don't think it needs to be in the teleopPeriodic
-
+        self.Drive.disableAutoForward()
         self.DS.setWhichVariable(True)
         self.Drive.updateSetpoint("teleop")
         self.Drive.disableVision()
@@ -205,6 +209,7 @@ class MyRobot(wpilib.IterativeRobot):
 
     def updater(self):
 
+        #print (self.ultrasonic.getRangeInches())
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 
 if __name__=="__main__":
