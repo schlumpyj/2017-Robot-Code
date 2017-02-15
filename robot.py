@@ -85,7 +85,8 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.vibrator = vibrator.Vibrator(self.joystick, self.vibrateTimer, .25, .15)
 
-
+        self.encoder = wpilib.Encoder(2, 3)
+        self.encoder.setDistancePerPulse(2)
 
         """
         The great NetworkTables part
@@ -115,6 +116,7 @@ class MyRobot(wpilib.IterativeRobot):
     def autonomousInit(self):
 
         self.matchTime.startMode(isAuto=True)
+        self.navx.reset()
         self.robotStats.putBoolean("enabled", True)
 
     def autonomousPeriodic(self):
@@ -129,6 +131,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
 
         self.ledRing.set(wpilib.Relay.Value.kOn) #I don't think it needs to be in the teleopPeriodic
+
         self.DS.setWhichVariable(True)
         self.Drive.updateSetpoint("teleop")
         self.Drive.disableVision()
@@ -141,6 +144,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Human controlled period
         """
+        print (self.encoder.getRate())
         self.matchTime.pushTime()
 
         if self.visionEnable.get():
