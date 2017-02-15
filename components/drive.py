@@ -27,23 +27,23 @@ class Drive(object):
         self.turnController = turnController
 
 
-        visionP = 0.01 #Likely will have to be much higher
+        visionP = 0.09 #Likely will have to be much higher
 
         visionController = wpilib.PIDController(visionP, 0, 0, 0, lambda: self.vision_x, output=self.autoAlignOutput)
         visionController.setInputRange(0.0, 320.0)
         visionController.setOutputRange(-.5, .5)
         visionController.setContinuous(False)
-        visionController.setPercentTolerance(4)
+        visionController.setPercentTolerance(.5)
         self.visionController = visionController
-        self.visionController.setSetpoint(160.0)
+        self.visionController.setSetpoint(190.0)
 
-        autoP = 0.03
+        autoP = 0.1
 
         autoTurn = wpilib.PIDController(visionP, 0, 0, 0, self.gyro, output=self.autoTurnOutput)
         autoTurn.setInputRange(-180.0,  180.0)
         autoTurn.setOutputRange(-.25, .25)
         autoTurn.setContinuous(True)
-        autoTurn.setPercentTolerance(3)
+        autoTurn.setPercentTolerance(2)
         self.autoTurn = autoTurn
 
 
@@ -93,28 +93,29 @@ class Drive(object):
 
     def engageVisionX(self, state, value):
         if state:
-            if self.visionController.isEnable():
-                return True
             self.visionController.enable()
             self.vision_x = value
-            print (self.vision_x)
+            #print (self.vision_x)
         else:
             self.visionController.disable()
 
     def getSetpoint(self):
         return self.turnController.getSetpoint()
 
+    def getAutoSetpoint(self):
+        return self.autoTurn.getSetpoint()
+
     def visionOnTarget(self):
 
         if self.visionController.onTarget():
-
+            print (self.vision_x)
             print ("Im on target!")
             return True
 
     def disableVision(self):
 
         self.visionController.disable()
-
+        self.autoTurn.disable()
     def pidWrite(self, output):
 
         self.rotation = output

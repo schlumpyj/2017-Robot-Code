@@ -116,6 +116,7 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.ledRing.set(wpilib.Relay.Value.kOn)
         self.matchTime.startMode(isAuto=True)
+        self.navx.reset()
         self.robotStats.putBoolean("enabled", True)
 
     def autonomousPeriodic(self):
@@ -129,6 +130,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
 
         self.ledRing.set(wpilib.Relay.Value.kOn) #I don't think it needs to be in the teleopPeriodic
+
         self.DS.setWhichVariable(True)
         self.Drive.updateSetpoint("teleop")
         self.Drive.disableVision()
