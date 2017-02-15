@@ -62,6 +62,10 @@ class Drive(object):
         self.autoForward = autoForward
 
 
+    """
+    Mecanum and tank functions
+    """
+
     def mecanumMove(self, x, y, rotation, throttle):
 
         if not self.turnController.isEnable():
@@ -88,19 +92,9 @@ class Drive(object):
         self.drivePiston.set(wpilib.DoubleSolenoid.Value.kReverse)
         self.robotDrive.arcadeDrive(throttle*y, throttle*x, True)
 
-    def updateSetpoint(self, controller, angle=0):
-        if controller == "teleop":
-            self.turnController.setSetpoint(self.gyro.getYaw())
-        elif controller == "auto":
-            self.autoTurn.setSetpoint(angle)
-
-    def enableAutoTurn(self):
-
-        self.autoTurn.enable()
-        if self.autoTurn.onTarget():
-            self.autoTurn.disable()
-            return True
-
+    """
+    Main PID Control for mostly teleop driving
+    """
     def setPIDenable(self, state):
 
         if state:
@@ -109,6 +103,33 @@ class Drive(object):
             self.turnController.disable()
             self.rotation = 0
 
+    def updateSetpoint(self, controller, angle=0):
+        if controller == "teleop":
+            self.turnController.setSetpoint(self.gyro.getYaw())
+        elif controller == "auto":
+            self.autoTurn.setSetpoint(angle)
+
+    def getSetpoint(self):
+        return self.turnController.getSetpoint()
+
+    """
+    Auto Turn variables
+    """
+    def enableAutoTurn(self):
+
+        self.autoTurn.enable()
+        if self.autoTurn.onTarget():
+            self.autoTurn.disable()
+            return True
+
+    def getAutoSetpoint(self):
+        return self.autoTurn.getSetpoint()
+
+
+    """
+    Vision Side to Side Stuff
+    """
+
     def engageVisionX(self, state, value):
         if state:
             self.visionController.enable()
@@ -116,31 +137,6 @@ class Drive(object):
             #print (self.vision_x)
         else:
             self.visionController.disable()
-
-    def getSetpoint(self):
-        return self.turnController.getSetpoint()
-
-    def getAutoSetpoint(self):
-        return self.autoTurn.getSetpoint()
-
-    def getCurrentEncoder(self):
-        return self.encoder.getDistance()
-
-    def setAutoForwardSetpoint(self, setpoint):
-
-        self.autoForward.setSetpoint(setpoint):
-
-    def isAutoForwardThere(self):
-
-        if self.autoForward.onTarget():
-            self.autoForward.disable()
-            return True
-
-        else:
-            self.autoForward.enable()
-
-    def disableAutoForward(self):
-        self.autoForward.disable()
 
     def visionOnTarget(self):
 
@@ -153,6 +149,38 @@ class Drive(object):
 
         self.visionController.disable()
         self.autoTurn.disable()
+
+
+    """
+    Encoder PID and stuff
+    """
+    def getCurrentEncoder(self):
+        return self.encoder.getDistance()
+
+    def resetEncoder(self):
+        self.encoder.reset()
+
+    def setAutoForwardSetpoint(self, setpoint):
+
+        self.autoForward.setSetpoint(setpoint)
+
+    def isAutoForwardOnTarget(self):
+
+        if self.autoForward.onTarget():
+            self.autoForward.disable()
+            return True
+
+        else:
+            self.autoForward.enable()
+
+    def disableAutoForward(self):
+        self.autoForward.disable()
+
+
+
+    """
+    All the PID Write functions...nothing to really see here
+    """
 
     def pidWrite(self, output):
 

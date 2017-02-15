@@ -116,6 +116,7 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.matchTime.startMode(isAuto=True)
         self.navx.reset()
+        self.Drive.resetEncoder()
         self.robotStats.putBoolean("enabled", True)
 
     def autonomousPeriodic(self):
@@ -143,7 +144,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Human controlled period
         """
-        print (self.encoder.getRate())
+        print (self.Drive.getCurrentEncoder())
         self.matchTime.pushTime()
 
         if self.visionEnable.get():
@@ -199,7 +200,7 @@ class MyRobot(wpilib.IterativeRobot):
             print ("something bad happened")
 
     def disabledPeriodic(self):
-        self.robotStats.putBoolean("enabled", False)
+        self.robotStats.putBoolean("enabled", False) #probably don't need this anymore
         self.updater()
 
     def updater(self):
