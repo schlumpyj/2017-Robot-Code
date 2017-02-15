@@ -3,8 +3,6 @@ import numpy as np
 import grip
 from GRIPget import WebcamVideoStream
 import time
-from RPILed import leds
-leds = leds().start()
 vid1 = WebcamVideoStream(src=0).start()
 another = grip.GripPipeline()
 counter = 0
@@ -20,4 +18,3 @@ try:
 except KeyboardInterrupt:
     print (counter/(time.time()-start))
     vid1.release()
-    leds.stop()
