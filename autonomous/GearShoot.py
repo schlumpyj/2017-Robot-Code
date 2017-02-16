@@ -12,13 +12,12 @@ class DriveForward(StatefulAutonomous):
 
     @timed_state(duration=0.5, next_state='drive_forward', first=True)
     def drive_wait(self):
-        #print ("yo")
+        
         self.drive.updateSetpoint("teleop", 0)
         self.drive.mecanumMove(0,0,0,0) #Wait a little bit
 
     @timed_state(duration=1.75, next_state='startPID')
     def drive_forward(self):
-        #print ("yo")
 
         self.drive.mecanumMove(0,-1,0,.4)
 

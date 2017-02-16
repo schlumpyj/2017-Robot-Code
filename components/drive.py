@@ -135,15 +135,13 @@ class Drive(object):
         if state:
             self.visionController.enable()
             self.vision_x = value
-            #print (self.vision_x)
-        else:
-            self.visionController.disable()
 
     def visionOnTarget(self):
 
         if self.visionController.onTarget():
             print (self.vision_x)
             print ("Im on target!")
+            self.visionController.disable()
             return True
 
     def disableVision(self):
