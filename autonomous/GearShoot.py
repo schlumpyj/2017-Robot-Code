@@ -6,15 +6,19 @@ class DriveForward(StatefulAutonomous):
     MODE_NAME = 'Gear Turn-Right Shoot'
     DEFAULT = 'True'
 
+    """
+        TODO:
+            - Have it floor it to the other side
+    """
     def initialize(self):
 
         self.drive_speed = -0.5
 
     @timed_state(duration=0.5, next_state='drive_forward', first=True)
     def drive_wait(self):
-        
-        self.drive.updateSetpoint("teleop", 0)
-        self.drive.mecanumMove(0,0,0,0) #Wait a little bit
+
+        self.drive.updateSetpoint("auto", 0) #might change back to teleop
+        self.drive.mecanumMove(0,0,0,0)
 
     @timed_state(duration=1.75, next_state='startPID')
     def drive_forward(self):
@@ -51,9 +55,12 @@ class DriveForward(StatefulAutonomous):
             self.drive.disableVision()
             self.next_state('goToPeg')
 
-    @timed_state(duration=1, next_state='openUp')
+    @state()
     def goToPeg(self):
-        self.drive.mecanumMove(0,-1,0,.32)
+        if self.ultrasonic.getRangeInches()<9:
+            self.next_state("openUp")
+        else:
+            self.drive.mecanumMove(0,-1,0,.17)
 
     @timed_state(duration=.75, next_state='goBack')
     def openUp(self):

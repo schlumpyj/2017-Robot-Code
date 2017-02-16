@@ -39,14 +39,15 @@ class MyRobot(wpilib.IterativeRobot):
         Sensors
         """
         self.navx = navx.AHRS.create_spi()
-        self.psiSensor = wpilib.AnalogInput(0)
+        self.psiSensor = wpilib.AnalogInput(2)
         self.powerBoard = wpilib.PowerDistributionPanel(0) #Might need or not
-        self.ultrasonic = wpilib.Ultrasonic(5, 4)
+        self.ultrasonic = wpilib.Ultrasonic(5, 4) #trigger to echo
         self.ultrasonic.setAutomaticMode(True)
 
         self.joystick = wpilib.Joystick(0) #xbox controller
 
         wpilib.CameraServer.launch('misc/vision.py:main')
+        
         """
         Buttons
         """
