@@ -4,11 +4,11 @@ import wpilib
 class DriveForward(StatefulAutonomous):
 
     MODE_NAME = 'Gear Turn-Right Shoot'
-    DEFAULT = 'True'
 
     """
         TODO:
             - Have it floor it to the other side
+            - Adjust angle and distance
     """
     def initialize(self):
 
@@ -47,10 +47,10 @@ class DriveForward(StatefulAutonomous):
             self.next_state('goForward')
 
         self.drive.mecanumMove(0,0,0,0)
-        #print (self.drive.getGyro())
+
     @timed_state(duration=1.05, next_state='findPeg')
     def goForward(self):
-
+        #maybe change this to zeros?
         self.drive.mecanumMove(0,-1,0,.3)
 
     @state()
@@ -67,9 +67,8 @@ class DriveForward(StatefulAutonomous):
             self.next_state("openUp")
         else:
             self.drive.disableVision()
-            self.drive.disableAutoForward()
+            self.drive.disableAutoForward() #This is likly the problem for not moving forward
             self.drive.disableAutoTurn()
-            #print ("yo")
             self.drive.mecanumMove(0,-1,0,.27)
         #print (self.ultrasonic.getRangeInches())
     @timed_state(duration=.75, next_state='goBack')

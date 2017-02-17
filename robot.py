@@ -22,11 +22,13 @@ class MyRobot(wpilib.IterativeRobot):
             self.motor2 = ctre.CANTalon(2)
             self.motor3 = ctre.CANTalon(3)
             self.motor4 = ctre.CANTalon(4)
+            self.led1 = ctre.CANTalon(5)
         else:
             self.motor1 = wpilib.Talon(1) #Drive Motors
             self.motor2 = wpilib.Talon(2)
             self.motor3 = wpilib.Talon(3)
             self.motor4 = wpilib.Talon(4)
+            self.led1 = wpilib.Talon(5)
 
         self.climb1 = wpilib.VictorSP(7)
         self.climb2 = wpilib.VictorSP(8)
@@ -47,7 +49,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.joystick = wpilib.Joystick(0) #xbox controller
 
         wpilib.CameraServer.launch('misc/vision.py:main')
-        
+
         """
         Buttons
         """
@@ -122,7 +124,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.matchTime.startMode(isAuto=True)
         self.navx.reset()
         self.Drive.resetEncoder()
-        self.robotStats.putBoolean("enabled", True)
 
     def autonomousPeriodic(self):
 
@@ -135,21 +136,23 @@ class MyRobot(wpilib.IterativeRobot):
             Makes sure the piston is where we think it is
         """
         self.Drive.resetEncoder()
-        self.ledRing.set(wpilib.Relay.Value.kOn) #I don't think it needs to be in the teleopPeriodic
+
         self.Drive.disableAutoForward()
+        self.Drive.disableAutoTurn()
+        self.Drive.disableVision()
+
         self.DS.setWhichVariable(True)
         self.Drive.updateSetpoint("teleop")
-        self.Drive.disableVision()
         self.DS.setFirstTimeVariable(True)
         self.timer.reset()
+
         self.matchTime.startMode(isAuto=False)
-        self.robotStats.putBoolean("enabled", True)
 
     def teleopPeriodic(self):
         """
             Human controlled period
         """
-        print (self.Drive.getCurrentEncoder())
+        self.ledRing.set(wpilib.Relay.Value.kOn)
         self.matchTime.pushTime()
 
         if self.visionEnable.get():
@@ -205,12 +208,10 @@ class MyRobot(wpilib.IterativeRobot):
             print ("something bad happened")
 
     def disabledPeriodic(self):
-        self.robotStats.putBoolean("enabled", False) #probably don't need this anymore
         self.updater()
 
     def updater(self):
-
-        #print (self.ultrasonic.getRangeInches())
+        self.robotStats.putNumber('F1', self.ultrasonic.getRangeInches())
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 
 if __name__=="__main__":
