@@ -17,4 +17,4 @@ class AlignGear(object):
                 self.vision_x = self.table.getNumber('centerX', 0)
             return self.vision_x
         except KeyError:
-            return 160 #should really return an error message or something
+            return KeyError #should really return an error message or something

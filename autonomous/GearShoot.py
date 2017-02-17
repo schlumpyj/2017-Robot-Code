@@ -17,13 +17,20 @@ class DriveForward(StatefulAutonomous):
     @timed_state(duration=0.5, next_state='drive_forward', first=True)
     def drive_wait(self):
 
-        self.drive.updateSetpoint("auto", 0) #might change back to teleop
         self.drive.mecanumMove(0,0,0,0)
+        self.drive.setAutoForwardSetpoint(92)
+        self.drive.updateSetpoint("auto", angle=0.0)
+        self.drive.setPIDenable(True)
 
     @timed_state(duration=1.75, next_state='startPID')
     def drive_forward(self):
 
-        self.drive.mecanumMove(0,-1,0,.4)
+        if self.drive.isAutoForwardOnTarget():
+            self.drive.mecanumMove(0,0,0,0)
+            self.drive.disableAutoForward()
+            self.next_state("startPID")
+        else:
+            self.drive.mecanumMove(0,0,0,0)
 
     @state()
     def startPID(self):
@@ -40,28 +47,31 @@ class DriveForward(StatefulAutonomous):
             self.next_state('goForward')
 
         self.drive.mecanumMove(0,0,0,0)
-
+        #print (self.drive.getGyro())
     @timed_state(duration=1.05, next_state='findPeg')
     def goForward(self):
 
-        self.drive.mecanumMove(0,-1,0,.2)
+        self.drive.mecanumMove(0,-1,0,.3)
 
     @state()
     def findPeg(self):
         self.drive.engageVisionX(True, self.alignGear.getAlignNumber())
-        self.drive.mecanumMove(0,0,0,0)
 
         if self.drive.visionOnTarget():
             self.drive.disableVision()
             self.next_state('goToPeg')
-
+        self.drive.mecanumMove(0,0,0,0)
     @state()
     def goToPeg(self):
         if self.ultrasonic.getRangeInches()<9:
             self.next_state("openUp")
         else:
-            self.drive.mecanumMove(0,-1,0,.17)
-
+            self.drive.disableVision()
+            self.drive.disableAutoForward()
+            self.drive.disableAutoTurn()
+            #print ("yo")
+            self.drive.mecanumMove(0,-1,0,.27)
+        #print (self.ultrasonic.getRangeInches())
     @timed_state(duration=.75, next_state='goBack')
     def openUp(self):
         self.gearPiston.set(True)

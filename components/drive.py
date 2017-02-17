@@ -39,9 +39,9 @@ class Drive(object):
         visionController.setInputRange(0.0, 320.0)
         visionController.setOutputRange(-.5, .5)
         visionController.setContinuous(False)
-        visionController.setPercentTolerance(.5)
+        visionController.setPercentTolerance(2)
         self.visionController = visionController
-        self.visionController.setSetpoint(190.0)
+        self.visionController.setSetpoint(160.0)
 
         autoP = 0.1
 
@@ -126,19 +126,26 @@ class Drive(object):
     def getAutoSetpoint(self):
         return self.autoTurn.getSetpoint()
 
+    def getGyro(self):
+        return self.gyro.getYaw()
 
+    def disableAutoTurn(self):
+        self.autoTurn.disable()
     """
     Vision Side to Side Stuff
     """
 
     def engageVisionX(self, state, value):
+        if value == KeyError:
+            self.visionController.disable()
         if state:
             self.visionController.enable()
             self.vision_x = value
+            print (value)
 
     def visionOnTarget(self):
 
-        if self.visionController.onTarget():
+        if self.vision_x< 170 and self.vision_x > 150:
             print (self.vision_x)
             print ("Im on target!")
             self.visionController.disable()

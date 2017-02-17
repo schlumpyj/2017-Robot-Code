@@ -11,7 +11,7 @@ class DriveForward(StatefulAutonomous):
     @timed_state(duration=0.5, next_state='drive_forward', first=True)
     def drive_wait(self):
         self.drive.mecanumMove(0,0,0,0)
-        self.drive.setAutoForwardSetpoint(110)
+        self.drive.setAutoForwardSetpoint(92)
         self.drive.updateSetpoint("auto", angle=0.0)
         self.drive.setPIDenable(True)
 
@@ -25,7 +25,7 @@ class DriveForward(StatefulAutonomous):
             self.drive.mecanumMove(0,0,0,0)
         #print (self.drive.getCurrentEncoder())
 
-    @timed_state(duration=0.5, next_state='goToPeg')
+    @timed_state(duration=0.5, next_state='stop')
     def stopForNow(self):
         self.drive.mecanumMove(0,0,0,0)
 
