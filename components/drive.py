@@ -43,13 +43,13 @@ class Drive(object):
         self.visionController = visionController
         self.visionController.setSetpoint(160.0)
 
-        autoP = 0.1
+        autoP = 0.15
 
         autoTurn = wpilib.PIDController(autoP, 0, 0, 0, self.gyro, output=self.autoTurnOutput)
         autoTurn.setInputRange(-180.0,  180.0)
         autoTurn.setOutputRange(-.25, .25)
         autoTurn.setContinuous(True)
-        autoTurn.setPercentTolerance(2)
+        autoTurn.setPercentTolerance(.5)
         self.autoTurn = autoTurn
 
         autoForwardP = 0.02 #I have no idea if this is good enough

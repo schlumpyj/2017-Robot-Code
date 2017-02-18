@@ -71,7 +71,7 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.encoder = wpilib.Encoder(2, 3)
         self.switch = wpilib.DigitalInput(6)
-        self.servo = wpilib.Servo(9)
+        self.servo = wpilib.Servo(0)
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
 
         self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx, self.encoder)
