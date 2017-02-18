@@ -70,7 +70,8 @@ class MyRobot(wpilib.IterativeRobot):
         self.safetyPiston = wpilib.Solenoid(1)
 
         self.encoder = wpilib.Encoder(2, 3)
-
+        self.switch = wpilib.DigitalInput(6)
+        self.servo = wpilib.Servo(9)
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
 
         self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx, self.encoder)
@@ -152,8 +153,14 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Human controlled period
         """
+        print (self.Drive.getCurrentEncoder())
         self.ledRing.set(wpilib.Relay.Value.kOn)
         self.matchTime.pushTime()
+
+        if self.joystick.getPOV(0) in [45, 90, 135]:
+            self.servo.set(1)
+        else:
+            self.servo.set(0)
 
         if self.visionEnable.get():
             self.DS.setFirstTimeVariable(True)
@@ -209,8 +216,8 @@ class MyRobot(wpilib.IterativeRobot):
 
     def disabledPeriodic(self):
         self.updater()
-
     def updater(self):
+        self.robotStats.putNumber('GEAR', self.switch.get())
         self.robotStats.putNumber('F1', self.ultrasonic.getRangeInches())
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 
