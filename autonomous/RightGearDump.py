@@ -3,7 +3,7 @@ import wpilib
 
 class DriveForward(StatefulAutonomous):
 
-    MODE_NAME = 'Left Gear Dump'
+    MODE_NAME = 'Right Gear Dump'
 
     """
         TODO:
@@ -34,7 +34,7 @@ class DriveForward(StatefulAutonomous):
 
     @state()
     def startPID(self):
-        self.drive.updateSetpoint("auto", -60)
+        self.drive.updateSetpoint("auto", 60)
         self.drive.setPIDenable(False)
         self.drive.mecanumMove(0,0,0,0)
         self.next_state('stopPID')
@@ -97,6 +97,7 @@ class DriveForward(StatefulAutonomous):
     @timed_state(duration=1, next_state="stop")
     def dropFuel(self):
         self.servo.set(1)
+
     @state()
     def stop(self):
         self.drive.mecanumMove(0,0,0,0)
