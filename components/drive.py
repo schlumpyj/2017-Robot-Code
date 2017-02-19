@@ -7,7 +7,7 @@ class Drive(object):
     My attempt at using OOP
     """
 
-    def __init__(self, robotDrive, drivePiston, gyro, encoder):
+    def __init__(self, robotDrive, drivePiston, gyro, encoder, led):
 
         self.drivePiston = drivePiston
         self.rotation = 0
@@ -17,6 +17,7 @@ class Drive(object):
         self.encoder = encoder
         self.rotateAuto = 0
         self.forward = 0
+        self.led = led
         self.robotDrive = robotDrive
 
         self.encoder.setDistancePerPulse(.106103)
@@ -138,20 +139,21 @@ class Drive(object):
         if value == 0:
             self.visionController.disable()
         if state:
+            self.led.set(wpilib.Relay.Value.kOn)
             self.visionController.enable()
             self.vision_x = value
             print (value)
 
     def visionOnTarget(self):
 
-        if self.vision_x< 170 and self.vision_x > 150:
+        if self.vision_x> 150 and self.vision_x < 170:
             print (self.vision_x)
             print ("Im on target!")
             self.visionController.disable()
             return True
 
     def disableVision(self):
-
+        self.led.set(wpilib.Relay.Value.kOff)
         self.visionController.disable()
         self.autoTurn.disable()
 

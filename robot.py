@@ -53,7 +53,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Buttons
         """
-        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 4) #X button
+        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 9) #X button
         self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 6)
         self.safetyPistonButton = wpilib.buttons.JoystickButton(self.joystick, 3)
         #Controll switch init for auto lock direction
@@ -74,7 +74,7 @@ class MyRobot(wpilib.IterativeRobot):
         self.servo = wpilib.Servo(0)
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
 
-        self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx, self.encoder)
+        self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx, self.encoder, self.ledRing)
         self.climber = climb.Climb(self.climb1, self.climb2)
 
         """
@@ -130,7 +130,6 @@ class MyRobot(wpilib.IterativeRobot):
 
         self.automodes.run()
         self.matchTime.pushTime()
-        self.ledRing.set(wpilib.Relay.Value.kOn)
 
     def teleopInit(self):
         """
@@ -154,7 +153,6 @@ class MyRobot(wpilib.IterativeRobot):
             Human controlled period
         """
         print (self.Drive.getCurrentEncoder())
-        self.ledRing.set(wpilib.Relay.Value.kOn)
         self.matchTime.pushTime()
 
         if self.joystick.getPOV(0) in [45, 90, 135]:
@@ -163,8 +161,9 @@ class MyRobot(wpilib.IterativeRobot):
             self.servo.set(0)
 
         if self.visionEnable.get():
-            self.DS.setFirstTimeVariable(True)
-            self.DS.setWhichVariable(True)
+            self.Drive.enableVisionX(True, self.alignGear.getAlignNumber())
+        else:
+            self.Drive.disableVision()
 
         self.updater()
 
