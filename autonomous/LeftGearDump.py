@@ -19,10 +19,10 @@ class DriveForward(StatefulAutonomous):
 
         self.drive.mecanumMove(0,0,0,0)
         self.drive.setAutoForwardSetpoint(92)
-        self.drive.updateSetpoint("auto", angle=0.0)
+        self.drive.updateSetpoint("teleop")
         self.drive.setPIDenable(True)
 
-    @timed_state(duration=2, next_state='startPID')
+    @timed_state(duration=1.75, next_state='startPID')
     def drive_forward(self):
 
         if self.drive.isAutoForwardOnTarget():
@@ -39,7 +39,7 @@ class DriveForward(StatefulAutonomous):
         self.drive.mecanumMove(0,0,0,0)
         self.next_state('stopPID')
 
-    @state()
+    @timed_state(duration=1.5, next_state="stop")
     def stopPID(self):
         if self.drive.enableAutoTurn():
             self.drive.setPIDenable(True)
@@ -48,12 +48,11 @@ class DriveForward(StatefulAutonomous):
 
         self.drive.mecanumMove(0,0,0,0)
 
-    @timed_state(duration=1.05, next_state='findPeg')
+    @timed_state(duration=.3, next_state='findPeg')
     def goForward(self):
-        #maybe change this to zeros?
-        self.drive.mecanumMove(0,-1,0,.3)
+        self.drive.mecanumMove(0,0,0,0)
 
-    @state()
+    @timed_state(duration=3, next_state="stop")
     def findPeg(self):
         self.drive.engageVisionX(True, self.alignGear.getAlignNumber())
 
@@ -61,7 +60,7 @@ class DriveForward(StatefulAutonomous):
             self.drive.disableVision()
             self.next_state('goToPeg')
         self.drive.mecanumMove(0,0,0,0)
-    @state()
+    @timed_state(duration=2, next_state="openUp")
     def goToPeg(self):
         if self.ultrasonic.getRangeInches()<9:
             self.next_state("openUp")
@@ -70,7 +69,7 @@ class DriveForward(StatefulAutonomous):
             self.drive.disableAutoForward() #This is likly the problem for not moving forward
             self.drive.disableAutoTurn()
             self.drive.mecanumMove(0,-1,0,.27)
-        #print (self.ultrasonic.getRangeInches())
+        print (self.ultrasonic.getRangeInches())
     @timed_state(duration=.75, next_state='goBackInit')
     def openUp(self):
         self.gearPiston.set(True)
@@ -82,7 +81,7 @@ class DriveForward(StatefulAutonomous):
         self.drive.updateSetpoint("auto", -60) #Maybe? Could use Teleop instead
         self.next_state("goBack")
 
-    @state()
+    @timed_state(duration=3, next_state="stop")
     def goBack(self):
         if self.drive.isAutoForwardOnTarget():
             self.drive.mecanumMove(0,0,0,0)

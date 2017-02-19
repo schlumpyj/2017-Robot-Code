@@ -107,7 +107,6 @@ class Drive(object):
         if controller == "teleop":
             self.turnController.setSetpoint(self.gyro.getYaw())
         elif controller == "auto":
-            print (angle)
             self.autoTurn.setSetpoint(angle)
 
     def getSetpoint(self):
@@ -136,7 +135,7 @@ class Drive(object):
     """
 
     def engageVisionX(self, state, value):
-        if value == KeyError:
+        if value == 0:
             self.visionController.disable()
         if state:
             self.visionController.enable()
