@@ -3,7 +3,7 @@ import wpilib
 
 class DriveForward(StatefulAutonomous):
 
-    MODE_NAME = 'Left Gear Dump'
+    MODE_NAME = 'Right Gear Dump'
 
     """
         TODO:
