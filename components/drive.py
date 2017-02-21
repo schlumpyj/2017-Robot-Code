@@ -34,7 +34,7 @@ class Drive(object):
         self.turnController = turnController
 
 
-        visionP = 0.09 #Likely will have to be much higher
+        visionP = 0.6 #Likely will have to be much higher
 
         visionController = wpilib.PIDController(visionP, 0, 0, 0, lambda: self.vision_x, output=self.autoAlignOutput)
         visionController.setInputRange(0.0, 320.0)
@@ -44,7 +44,7 @@ class Drive(object):
         self.visionController = visionController
         self.visionController.setSetpoint(160.0)
 
-        autoP = 0.15
+        autoP = 0.99
 
         autoTurn = wpilib.PIDController(autoP, 0, 0, 0, self.gyro, output=self.autoTurnOutput)
         autoTurn.setInputRange(-180.0,  180.0)
@@ -56,7 +56,7 @@ class Drive(object):
         autoForwardP = 0.02 #I have no idea if this is good enough
 
         autoForward = wpilib.PIDController(autoForwardP, 0, 0, 0, self.encoder, output=self.autoForwardOutput)
-        autoForward.setInputRange(0, 180.0) #I don't know what to put for the input range
+        autoForward.setInputRange(-180.0, 180.0) #I don't know what to put for the input range
         autoForward.setOutputRange(-.4, .4)
         autoForward.setContinuous(False)
         autoForward.setPercentTolerance(.5)
@@ -136,17 +136,20 @@ class Drive(object):
     """
 
     def engageVisionX(self, state, value):
+        self.led.set(wpilib.Relay.Value.kOn)
         if value == 0:
             self.visionController.disable()
         if state:
-            self.led.set(wpilib.Relay.Value.kOn)
             self.visionController.enable()
             self.vision_x = value
             print (value)
 
+    def turnLightOn(self):
+        self.led.set(wpilib.Relay.Value.kOn)
+
     def visionOnTarget(self):
 
-        if self.vision_x> 150 and self.vision_x < 170:
+        if self.vision_x> 145 and self.vision_x < 155:
             print (self.vision_x)
             print ("Im on target!")
             self.visionController.disable()

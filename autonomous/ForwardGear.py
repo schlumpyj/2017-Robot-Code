@@ -8,7 +8,7 @@ class DriveForward(StatefulAutonomous):
 
         self.speed = -.4
 
-    @timed_state(duration=0.5, next_state='drive_forward', first=True)
+    @timed_state(duration=0.5, next_state='goToPeg', first=True)
     def drive_wait(self):
         self.drive.mecanumMove(0,0,0,0)
         self.drive.setAutoForwardSetpoint(92)

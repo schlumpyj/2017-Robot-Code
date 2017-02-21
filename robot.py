@@ -54,12 +54,13 @@ class MyRobot(wpilib.IterativeRobot):
         Buttons
         """
         self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 9) #X button
-        self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 6)
+        self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 5)
         self.safetyPistonButton = wpilib.buttons.JoystickButton(self.joystick, 3)
         #Controll switch init for auto lock direction
         self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5)
         #for drive toggle
-        self.driveControlButton = button_debouncer.ButtonDebouncer(self.joystick,5, period=0.5)
+        self.wrongEric = wpilib.buttons.JoystickButton(self.joystick, 6)
+        self.driveControlButton = button_debouncer.ButtonDebouncer(self.joystick,1, period=0.5)
 
         #Button for slow reverse out of climb
         self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,2)
@@ -152,7 +153,7 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Human controlled period
         """
-        print (self.Drive.getCurrentEncoder())
+        #print (self.Drive.getCurrentEncoder())
         self.matchTime.pushTime()
 
         if self.joystick.getPOV(0) in [45, 90, 135]:
@@ -161,7 +162,7 @@ class MyRobot(wpilib.IterativeRobot):
             self.servo.set(0)
 
         if self.visionEnable.get():
-            self.Drive.enableVisionX(True, self.alignGear.getAlignNumber())
+            self.Drive.engageVisionX(True, self.alignGear.getAlignNumber())
         else:
             self.Drive.disableVision()
 

@@ -10,7 +10,7 @@ def main():
     camera = cs.startAutomaticCapture()
 
     camera.setResolution(320, 240)
-    camera.setFPS(20)
+    camera.setFPS(30)
     # Get a CvSink. This will capture images from the camera
     cvSink = cs.getVideo()
 
@@ -31,7 +31,7 @@ def main():
             continue
 
         # Put a rectangle on the image
-        cv2.rectangle(img, (100, 100), (300, 300), (255, 255, 255), 5)
+        #cv2.rectangle(img, (100, 100), (300, 300), (255, 255, 255), 5)
 
         # Give the output stream a new image to display
         outputStream.putFrame(img)
