@@ -9,8 +9,8 @@ def main():
 
     camera = cs.startAutomaticCapture()
 
-    camera.setResolution(320, 240)
-    camera.setFPS(30)
+    camera.setResolution(160, 120)
+    camera.setFPS(20)
     # Get a CvSink. This will capture images from the camera
     cvSink = cs.getVideo()
 
@@ -18,7 +18,7 @@ def main():
     outputStream = cs.putVideo("Rectangle", 320, 240)
 
     # Allocating new images is very expensive, always try to preallocate
-    img = np.zeros(shape=(240, 320, 3), dtype=np.uint8)
+    img = np.zeros(shape=(120, 160, 3), dtype=np.uint8)
 
     while True:
         # Tell the CvSink to grab a frame from the camera and put it

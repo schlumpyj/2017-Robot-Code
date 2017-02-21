@@ -34,21 +34,21 @@ class Drive(object):
         self.turnController = turnController
 
 
-        visionP = 0.6 #Likely will have to be much higher
+        visionP = 0.4 #Likely will have to be much higher
 
         visionController = wpilib.PIDController(visionP, 0, 0, 0, lambda: self.vision_x, output=self.autoAlignOutput)
         visionController.setInputRange(0.0, 320.0)
-        visionController.setOutputRange(-.5, .5)
+        visionController.setOutputRange(-.7, .7)
         visionController.setContinuous(False)
         visionController.setPercentTolerance(2)
         self.visionController = visionController
         self.visionController.setSetpoint(160.0)
 
-        autoP = 0.99
+        autoP = 0.25
 
         autoTurn = wpilib.PIDController(autoP, 0, 0, 0, self.gyro, output=self.autoTurnOutput)
         autoTurn.setInputRange(-180.0,  180.0)
-        autoTurn.setOutputRange(-.25, .25)
+        autoTurn.setOutputRange(-.75, .75)
         autoTurn.setContinuous(True)
         autoTurn.setPercentTolerance(.5)
         self.autoTurn = autoTurn
