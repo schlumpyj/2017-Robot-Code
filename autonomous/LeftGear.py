@@ -18,7 +18,7 @@ class DriveForward(StatefulAutonomous):
     def drive_wait(self):
 
         self.drive.mecanumMove(0,0,0,0)
-        self.drive.setAutoForwardSetpoint(92)
+        self.drive.setAutoForwardSetpoint(80)
         self.drive.updateSetpoint("teleop")
         self.drive.setPIDenable(True)
 
@@ -39,7 +39,7 @@ class DriveForward(StatefulAutonomous):
         self.drive.mecanumMove(0,0,0,0)
         self.next_state('stopPID')
 
-    @timed_state(duration=1.5, next_state="stop")
+    @timed_state(duration=3, next_state="stop")
     def stopPID(self):
         if self.drive.enableAutoTurn():
             self.drive.setPIDenable(True)
@@ -48,9 +48,10 @@ class DriveForward(StatefulAutonomous):
 
         self.drive.mecanumMove(0,0,0,0)
 
-    @timed_state(duration=.3, next_state='findPeg')
+    @timed_state(duration=1.05, next_state='findPeg')
     def goForward(self):
-        self.drive.mecanumMove(0,0,0,0)
+        self.drive.turnLightOn()
+        self.drive.mecanumMove(0,1,0,.2)
 
     @timed_state(duration=3, next_state="stop")
     def findPeg(self):
@@ -60,7 +61,7 @@ class DriveForward(StatefulAutonomous):
             self.drive.disableVision()
             self.next_state('goToPeg')
         self.drive.mecanumMove(0,0,0,0)
-    @timed_state(duration=2, next_state="openUp")
+    @timed_state(duration=2.5, next_state="openUp")
     def goToPeg(self):
         if self.ultrasonic.getRangeInches()<9:
             self.next_state("openUp")
@@ -70,14 +71,14 @@ class DriveForward(StatefulAutonomous):
             self.drive.disableAutoTurn()
             self.drive.mecanumMove(0,-1,0,.27)
         print (self.ultrasonic.getRangeInches())
-    @timed_state(duration=.75, next_state='goBack')
+    @timed_state(duration=.6, next_state='backWhileOpen')
     def openUp(self):
         self.gearPiston.set(True)
 
     @timed_state(duration=1, next_state='stop')
-    def goBack(self):
+    def backWhileOpen(self):
         self.gearPiston.set(True)
-        self.drive.mecanumMove(0,1,0,.3)
+        self.drive.mecanumMove(0,1,0,.2)
 
     @state()
     def stop(self):

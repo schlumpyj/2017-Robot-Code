@@ -2,7 +2,8 @@ from robotpy_ext.autonomous import StatefulAutonomous, timed_state, state
 
 class DriveForward(StatefulAutonomous):
 
-    MODE_NAME = 'Drive Forward Long'
+    MODE_NAME = 'Drive Forward Short'
+    DEFAULT = True
 
     def initialize(self):
 
@@ -12,7 +13,7 @@ class DriveForward(StatefulAutonomous):
     def drive_wait(self):
         self.drive.tankMove(0,0,0)
 
-    @timed_state(duration=4, next_state='stop')
+    @timed_state(duration=2, next_state='stop')
     def drive_forward(self):
         self.drive.tankMove(0, 1, self.speed)
 

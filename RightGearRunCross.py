@@ -3,7 +3,7 @@ import wpilib
 
 class DriveForward(StatefulAutonomous):
 
-    MODE_NAME = 'Left Gear Dump'
+    MODE_NAME = 'Turn-Right Gear Sprint Cross'
 
     """
         TODO:
@@ -20,6 +20,7 @@ class DriveForward(StatefulAutonomous):
         self.drive.mecanumMove(0,0,0,0)
         self.drive.setAutoForwardSetpoint(80)
         self.drive.updateSetpoint("teleop")
+        self.ogAngle = self.drive.getGyro()
         self.drive.setPIDenable(True)
 
     @timed_state(duration=1.75, next_state='startPID')
@@ -75,40 +76,30 @@ class DriveForward(StatefulAutonomous):
     def openUp(self):
         self.gearPiston.set(True)
 
-    @timed_state(duration=1, next_state='goBackInit')
+    @timed_state(duration=1, next_state='turnBackInit')
     def backWhileOpen(self):
         self.gearPiston.set(True)
         self.drive.mecanumMove(0,1,0,.2)
 
     @state()
-    def goBackInit(self):
-        self.drive.resetEncoder()
-        self.gearPiston.set(True)
-        self.drive.setAutoForwardSetpoint(-85) #Guessing
-        self.drive.updateSetpoint("teleop") #Maybe? Could use Teleop instead
-        self.next_state("goBack")
+    def turnBackInit(self):
+        self.drive.updateSetpoint("auto", self.ogAngle)
+        self.drive.setPIDenable(False)
+        self.drive.mecanumMove(0,0,0,0)
+        self.next_state('turnBack')
+
+    @timed_state(duration=2, next_state="stop")
+    def turnBack(self):
+        if self.drive.enableAutoTurn():
+            self.drive.setPIDenable(True)
+            self.drive.updateSetpoint("teleop")
+            self.next_state('sprint')
+        self.drive.mecanumMove(0,0,0,0)
 
     @timed_state(duration=3, next_state="stop")
-    def goBack(self):
-        if self.drive.isAutoForwardOnTarget():
-            self.drive.mecanumMove(0,0,0,0)
-            self.drive.disableAutoForward()
-            self.next_state("strafeOver")
-        else:
-            print (self.drive.getCurrentEncoder())
-            self.drive.mecanumMove(0,0,0,0)
+    def sprint(self):
+        self.drive.mecanumMove(-1,-1,0,.5)
 
-    @timed_state(duration=1.5, next_state="dropFuel")
-    def strafeOver(self):
-        self.drive.disableVision()
-        self.drive.disableAutoForward()
-        self.drive.mecanumMove(1,0,0,.8)
-
-    @timed_state(duration=1, next_state="stop")
-    def dropFuel(self):
-        #self.servo.set(1)
-        self.drive.mecanumMove(0,0,0,0)
-        print ("yo!")
     @state()
     def stop(self):
         self.drive.mecanumMove(0,0,0,0)

@@ -74,7 +74,6 @@ class DriveForward(StatefulAutonomous):
     @timed_state(duration=.6, next_state='backWhileOpen')
     def openUp(self):
         self.gearPiston.set(True)
-        self.drive.resetEncoder()
 
     @timed_state(duration=1, next_state='goBackInit')
     def backWhileOpen(self):
@@ -83,6 +82,7 @@ class DriveForward(StatefulAutonomous):
 
     @state()
     def goBackInit(self):
+        self.drive.resetEncoder()
         self.gearPiston.set(True)
         self.drive.setAutoForwardSetpoint(-85) #Guessing
         self.drive.updateSetpoint("teleop") #Maybe? Could use Teleop instead
