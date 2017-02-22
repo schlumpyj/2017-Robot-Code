@@ -34,7 +34,7 @@ class Drive(object):
         self.turnController = turnController
 
 
-        visionP = 0.4 #Likely will have to be much higher
+        visionP = 0.15 #Likely will have to be much higher
 
         visionController = wpilib.PIDController(visionP, 0, 0, 0, lambda: self.vision_x, output=self.autoAlignOutput)
         visionController.setInputRange(0.0, 320.0)
@@ -44,13 +44,13 @@ class Drive(object):
         self.visionController = visionController
         self.visionController.setSetpoint(160.0)
 
-        autoP = 0.25
+        autoP = 0.015
 
         autoTurn = wpilib.PIDController(autoP, 0, 0, 0, self.gyro, output=self.autoTurnOutput)
         autoTurn.setInputRange(-180.0,  180.0)
         autoTurn.setOutputRange(-.75, .75)
         autoTurn.setContinuous(True)
-        autoTurn.setPercentTolerance(.5)
+        autoTurn.setPercentTolerance(1)
         self.autoTurn = autoTurn
 
         autoForwardP = 0.02 #I have no idea if this is good enough
@@ -149,7 +149,7 @@ class Drive(object):
 
     def visionOnTarget(self):
 
-        if self.vision_x> 145 and self.vision_x < 155:
+        if self.vision_x> 160 and self.vision_x < 165:
             print (self.vision_x)
             print ("Im on target!")
             self.visionController.disable()

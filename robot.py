@@ -155,7 +155,8 @@ class MyRobot(wpilib.IterativeRobot):
         """
         #print (self.Drive.getCurrentEncoder())
         self.matchTime.pushTime()
-
+        print (self.alignGear.getAlignNumber())
+        #self.ledRing.set(wpilib.Relay.Value.kOn)
         if self.joystick.getPOV(0) in [45, 90, 135]:
             self.servo.set(1)
         else:

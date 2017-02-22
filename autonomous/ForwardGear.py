@@ -10,6 +10,7 @@ class DriveForward(StatefulAutonomous):
 
     @timed_state(duration=0.5, next_state='goToPeg', first=True)
     def drive_wait(self):
+        self.gearPiston.set(False)
         self.drive.mecanumMove(0,0,0,0)
         self.drive.setAutoForwardSetpoint(92)
         self.drive.updateSetpoint("teleop")
@@ -17,6 +18,7 @@ class DriveForward(StatefulAutonomous):
 
     @timed_state(duration=4, next_state="stop")
     def goToPeg(self):
+        self.gearPiston.set(False)
         if self.ultrasonic.getRangeInches()<9:
             self.next_state("openUp")
         else:
