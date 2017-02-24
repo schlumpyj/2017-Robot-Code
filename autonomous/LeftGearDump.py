@@ -12,7 +12,7 @@ class DriveForward(StatefulAutonomous):
     """
     def initialize(self):
 
-        self.drive_speed = -0.5
+        pass
 
     @timed_state(duration=0.5, next_state='drive_forward', first=True)
     def drive_wait(self):
@@ -33,6 +33,7 @@ class DriveForward(StatefulAutonomous):
             self.drive.mecanumMove(0,0,0,0)
     @timed_state(duration=.5, next_state="startPID")
     def wait(self):
+        self.gearPiston.set(False)
         self.drive.mecanumMove(0,0,0,0)
     @state()
     def startPID(self):
@@ -48,24 +49,28 @@ class DriveForward(StatefulAutonomous):
             self.drive.setPIDenable(True)
             self.drive.updateSetpoint("teleop")
             self.next_state('goForward')
-
+        self.gearPiston.set(False)
         self.drive.mecanumMove(0,0,0,0)
 
     @timed_state(duration=1.05, next_state='findPeg')
     def goForward(self):
+        self.gearPiston.set(False)
         self.drive.turnLightOn()
         self.drive.mecanumMove(0,1,0,.5)
+        self.drive.disableAutoForward()
+        self.drive.disableAutoTurn()
 
     @timed_state(duration=3, next_state="stop")
     def findPeg(self):
+        self.gearPiston.set(False)
         self.drive.engageVisionX(True, self.alignGear.getAlignNumber())
-
         if self.drive.visionOnTarget():
             self.drive.disableVision()
             self.next_state('goToPeg')
         self.drive.mecanumMove(0,0,0,0)
     @timed_state(duration=2.5, next_state="openUp")
     def goToPeg(self):
+        self.gearPiston.set(False)
         if self.ultrasonic.getRangeInches()<9:
             self.next_state("openUp")
         else:
@@ -79,7 +84,7 @@ class DriveForward(StatefulAutonomous):
         self.gearPiston.set(True)
         self.drive.mecanumMove(0,0,0,0)
         self.drive.disableAutoForward()
-        
+
     @timed_state(duration=1, next_state='pushGear')
     def backWhileOpen(self):
         self.gearPiston.set(True)
@@ -99,6 +104,7 @@ class DriveForward(StatefulAutonomous):
 
     @timed_state(duration=3, next_state="stop")
     def goBack(self):
+        self.gearPiston.set(False)
         if self.drive.isAutoForwardOnTarget():
             self.drive.mecanumMove(0,0,0,0)
             self.drive.disableAutoForward()
@@ -109,6 +115,7 @@ class DriveForward(StatefulAutonomous):
 
     @timed_state(duration=1.5, next_state="dropFuel")
     def strafeOver(self):
+        self.gearPiston.set(False)
         self.drive.disableVision()
         self.drive.disableAutoForward()
         self.drive.mecanumMove(1,0,0,.8)
@@ -116,8 +123,9 @@ class DriveForward(StatefulAutonomous):
     @timed_state(duration=1, next_state="stop")
     def dropFuel(self):
         #self.servo.set(1)
+        self.gearPiston.set(False)
         self.drive.mecanumMove(0,0,0,0)
-        print ("yo!")
     @state()
     def stop(self):
+        self.gearPiston.set(False)
         self.drive.mecanumMove(0,0,0,0)
