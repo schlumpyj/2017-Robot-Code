@@ -56,7 +56,7 @@ class DriveForward(StatefulAutonomous):
     def goForward(self):
         self.gearPiston.set(False)
         self.drive.turnLightOn()
-        self.drive.mecanumMove(0,1,0,.5)
+        self.drive.mecanumMove(0,1,0,.2)
         self.drive.disableAutoForward()
         self.drive.disableAutoTurn()
 
