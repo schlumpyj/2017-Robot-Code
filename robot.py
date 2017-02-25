@@ -22,13 +22,11 @@ class MyRobot(wpilib.IterativeRobot):
             self.motor2 = ctre.CANTalon(2)
             self.motor3 = ctre.CANTalon(3)
             self.motor4 = ctre.CANTalon(4)
-            self.led1 = ctre.CANTalon(5)
         else:
             self.motor1 = wpilib.Talon(1) #Drive Motors
             self.motor2 = wpilib.Talon(2)
             self.motor3 = wpilib.Talon(3)
             self.motor4 = wpilib.Talon(4)
-            self.led1 = wpilib.Talon(5)
 
         self.climb1 = wpilib.VictorSP(7)
         self.climb2 = wpilib.VictorSP(8)

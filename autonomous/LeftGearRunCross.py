@@ -109,7 +109,7 @@ class DriveForward(StatefulAutonomous):
 
     @timed_state(duration=3, next_state="stop")
     def sprint(self):
-        self.drive.mecanumMove(-1,-1,0,.5)
+        self.drive.mecanumMove(1,-1,0,.5)
 
     @state()
     def stop(self):

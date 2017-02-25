@@ -2,7 +2,7 @@ from robotpy_ext.autonomous import StatefulAutonomous, timed_state, state
 
 class DriveForward(StatefulAutonomous):
 
-    MODE_NAME = 'Forward Gear Vision'
+    MODE_NAME = 'Forward Gear Vision Right'
 
     def initialize(self):
 
@@ -62,14 +62,24 @@ class DriveForward(StatefulAutonomous):
     def backWhileOpen(self):
         self.gearPiston.set(True)
         self.drive.mecanumMove(0,1,0,.2)
-    @timed_state(duration=1, next_state="stop")
+    @timed_state(duration=1, next_state="backAfterPush")
     def pushGear(self):
         self.gearPiston.set(False)
         self.drive.mecanumMove(0,-1,0,.23)
-    @timed_state(duration=1, next_state="stop")
+    @timed_state(duration=1, next_state="strafeRight")
     def backAfterPush(self):
         self.gearPiston.set(False)
-        self.drive.mecanumMove(0,1,0,.23)        
+        self.drive.mecanumMove(0,1,0,.3)
+
+    @timed_state(duration=2, next_state="onWards")
+    def strafeRight(self):
+        self.gearPiston.set(False)
+        self.drive.mecanumMove(-1,0,0,.7)
+
+    @timed_state(duration=2, next_state="stop")
+    def onWards(self):
+        self.gearPiston.set(False)
+        self.drive.mecanumMove(0,-1,0,.5)
     @state()
     def stop(self):
         self.drive.mecanumMove(0,0,0,0)
