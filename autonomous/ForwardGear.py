@@ -6,7 +6,7 @@ class DriveForward(StatefulAutonomous):
 
     def initialize(self):
 
-        self.speed = -.4
+        pass
 
     @timed_state(duration=0.5, next_state='goToPeg', first=True)
     def drive_wait(self):
@@ -25,13 +25,23 @@ class DriveForward(StatefulAutonomous):
             self.drive.mecanumMove(0,-1,0,.3)
         print (self.ultrasonic.getRangeInches())
 
-    @timed_state(duration=.75, next_state='goBack')
+    @timed_state(duration=.6, next_state='backWhileOpen')
     def openUp(self):
         self.gearPiston.set(True)
+        self.drive.mecanumMove(0,0,0,0)
+        self.drive.disableAutoForward()
 
-    @timed_state(duration=1, next_state='stop')
-    def goBack(self):
+    @timed_state(duration=1, next_state='pushGear')
+    def backWhileOpen(self):
         self.gearPiston.set(True)
+        self.drive.mecanumMove(0,1,0,.2)
+    @timed_state(duration=1, next_state="backAfterPush")
+    def pushGear(self):
+        self.gearPiston.set(False)
+        self.drive.mecanumMove(0,-1,0,.23)
+    @timed_state(duration=1, next_state="stop")
+    def backAfterPush(self):
+        self.gearPiston.set(False)
         self.drive.mecanumMove(0,1,0,.3)
 
     @state()

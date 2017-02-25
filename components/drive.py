@@ -4,8 +4,9 @@ import wpilib
 class Drive(object):
 
     """
-    My attempt at using OOP
+    Everything and anything related to driving
     """
+
 
     def __init__(self, robotDrive, drivePiston, gyro, encoder, led):
 
@@ -74,7 +75,7 @@ class Drive(object):
                  self.rotation = 0
             else:
                  self.rotation = rotation
-            self.rotation = rotation
+            #self.rotation = rotation
 
         if self.autoTurn.isEnable():
             self.rotation = self.rotateAuto

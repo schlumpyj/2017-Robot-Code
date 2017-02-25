@@ -6,7 +6,7 @@ class DriveForward(StatefulAutonomous):
 
     def initialize(self):
 
-        self.speed = -.4
+        pass
 
     @timed_state(duration=0.5, next_state='drive_forward', first=True)
     def drive_wait(self):
