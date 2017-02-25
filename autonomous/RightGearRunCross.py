@@ -5,11 +5,6 @@ class DriveForward(StatefulAutonomous):
 
     MODE_NAME = 'Turn-Right Gear Sprint Cross'
 
-    """
-        TODO:
-            - Have it floor it to the other side
-            - Adjust angle and distance
-    """
     def initialize(self):
 
         self.drive_speed = -0.5

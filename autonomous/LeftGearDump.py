@@ -5,11 +5,6 @@ class DriveForward(StatefulAutonomous):
 
     MODE_NAME = 'Left Gear Dump'
 
-    """
-        TODO:
-            - Have it floor it to the other side
-            - Adjust angle and distance
-    """
     def initialize(self):
 
         pass
