@@ -6,7 +6,6 @@ class DriveForward(StatefulAutonomous):
     MODE_NAME = 'Left Gear Dump'
 
     def initialize(self):
-
         pass
 
     @timed_state(duration=0.5, next_state='drive_forward', first=True)
@@ -20,6 +19,7 @@ class DriveForward(StatefulAutonomous):
     @timed_state(duration=1.75, next_state='wait')
     def drive_forward(self):
         self.gearPiston.set(False)
+        print (self.drive.listEnabled())
         if self.drive.isAutoForwardOnTarget():
             self.drive.mecanumMove(0,0,0,0)
             self.drive.disableAutoForward()

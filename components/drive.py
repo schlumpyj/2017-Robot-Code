@@ -150,7 +150,7 @@ class Drive(object):
 
     def visionOnTarget(self):
 
-        if self.vision_x> 160 and self.vision_x < 165:
+        if self.vision_x> 155 and self.vision_x < 165:
             print (self.vision_x)
             print ("Im on target!")
             self.visionController.disable()
@@ -180,14 +180,23 @@ class Drive(object):
         if self.autoForward.onTarget():
             self.autoForward.disable()
             return True
-
         else:
             self.autoForward.enable()
 
     def disableAutoForward(self):
         self.autoForward.disable()
 
-
+    def listEnabled(self):
+        listOf = []
+        if self.visionController.isEnable():
+            listOf.append("Vision Controller")
+        if self.turnController.isEnable():
+            listOf.append("Main PID Controller")
+        if self.autoForward.isEnable():
+            listOf.append("Auto Forward")
+        if self.autoTurn.isEnable():
+            listOf.append("Auto Turn")
+        return listOf
 
     """
     All the PID Write functions...nothing to really see here

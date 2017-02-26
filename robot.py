@@ -8,7 +8,6 @@ from robotpy_ext.autonomous import AutonomousModeSelector
 from robotpy_ext.control import button_debouncer
 from networktables import NetworkTable
 import networktables
-import time
 
 class MyRobot(wpilib.IterativeRobot):
 
@@ -59,7 +58,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.safetyPistonButton = wpilib.buttons.JoystickButton(self.joystick, 3)
         self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5) #Controll switch init for auto lock direction
         self.driveControlButton = button_debouncer.ButtonDebouncer(self.joystick,1, period=0.5) #Mecanum to tank and the other way
-
         self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,2)#Button for reverse out of climb
 
         """
