@@ -49,7 +49,7 @@ class driveStraight(object):
                 self.timer.reset()
                 self.Drive.setPIDenable(False)
                 self.firstTime = True
-            self.table.putString("isLock", "locked")
+            self.table.putBoolean("isLock", True)
         else:
-            self.table.putString("isLock", "notLocked")
+            self.table.putBoolean("isLock", False)
             self.Drive.setPIDenable(False)

@@ -38,11 +38,14 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Sensors
         """
-        self.navx = navx.AHRS.create_spi()
+        self.navx = navx.AHRS.create_spi() #the Gyro
         self.psiSensor = wpilib.AnalogInput(2)
         self.powerBoard = wpilib.PowerDistributionPanel(0) #Might need or not
         self.ultrasonic = wpilib.Ultrasonic(5, 4) #trigger to echo
         self.ultrasonic.setAutomaticMode(True)
+        self.encoder = wpilib.Encoder(2, 3)
+        self.switch = wpilib.DigitalInput(6)
+        self.servo = wpilib.Servo(0)
 
         self.joystick = wpilib.Joystick(0) #xbox controller
 
@@ -54,23 +57,18 @@ class MyRobot(wpilib.IterativeRobot):
         self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 9) #X button
         self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 5)
         self.safetyPistonButton = wpilib.buttons.JoystickButton(self.joystick, 3)
-        #Controll switch init for auto lock direction
-        self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5)
-        #for drive toggle
-        self.wrongEric = wpilib.buttons.JoystickButton(self.joystick, 6)
-        self.driveControlButton = button_debouncer.ButtonDebouncer(self.joystick,1, period=0.5)
+        self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5) #Controll switch init for auto lock direction
+        self.driveControlButton = button_debouncer.ButtonDebouncer(self.joystick,1, period=0.5) #Mecanum to tank and the other way
 
-        #Button for slow reverse out of climb
-        self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,2)
+        self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,2)#Button for reverse out of climb
 
-
+        """
+        Solenoids
+        """
         self.drivePiston = wpilib.DoubleSolenoid(3,4) #Changes us from mecanum to hi-grip
         self.gearPiston = wpilib.Solenoid(2)
         self.safetyPiston = wpilib.Solenoid(1)
 
-        self.encoder = wpilib.Encoder(2, 3)
-        self.switch = wpilib.DigitalInput(6)
-        self.servo = wpilib.Servo(0)
         self.robodrive = wpilib.RobotDrive(self.motor1, self.motor4, self.motor3, self.motor2)
 
         self.Drive = drive.Drive(self.robodrive, self.drivePiston, self.navx, self.encoder, self.ledRing)
@@ -100,9 +98,6 @@ class MyRobot(wpilib.IterativeRobot):
         self.alignGear = alignGear.AlignGear(self.vision_table)
         self.robotStats = NetworkTable.getTable('SmartDashboard')
         self.matchTime = matchTime.MatchTime(self.timer, self.robotStats)
-
-        self.robotStats.putBoolean("enabled", False)
-        self.robotStats.putString("Gear", "nope")
         """
         Drive Straight
         """
@@ -151,10 +146,13 @@ class MyRobot(wpilib.IterativeRobot):
         """
             Human controlled period
         """
+        #Common print statements
         #print (self.Drive.getCurrentEncoder())
-        self.matchTime.pushTime()
-        print (self.alignGear.getAlignNumber())
+        #print (self.alignGear.getAlignNumber())
         #self.ledRing.set(wpilib.Relay.Value.kOn)
+
+        self.matchTime.pushTime()
+
         if self.joystick.getPOV(0) in [45, 90, 135]:
             self.servo.set(1)
         else:
@@ -202,12 +200,12 @@ class MyRobot(wpilib.IterativeRobot):
         self.throttle = ((self.joystick.getRawAxis(3)*.65)+.35) # 35% base
 
         if self.motorWhere==False: #tank
-            self.robotStats.putString("State", "tank")
+            self.robotStats.putBoolean("State", False)
             self.Drive.tankMove(-1*self.joystick.getX(), self.joystick.getY(), self.throttle)
             self.Drive.updateSetpoint("teleop") #should fix angle error
 
         elif self.motorWhere==True: # Mecanum
-            self.robotStats.putString("State", "mecanum")
+            self.robotStats.putBoolean("State", True)
             self.Drive.mecanumMove((-1*self.joystick.getX()),self.joystick.getY(), self.rotationXbox, self.throttle)
 
         else:
@@ -216,7 +214,7 @@ class MyRobot(wpilib.IterativeRobot):
     def disabledPeriodic(self):
         self.updater()
     def updater(self):
-        self.robotStats.putNumber('GEAR', self.switch.get())
+        self.robotStats.putBoolean('GEAR', self.switch.get())
         self.robotStats.putNumber('F1', self.ultrasonic.getRangeInches())
         self.robotStats.putNumber('PSI', self.psiSensor.getVoltage())
 

@@ -16,7 +16,7 @@ class MatchTime(object):
 
         self.endTime = self.timer.getFPGATimestamp()-self.startTime
 
-        if self.isAuto:
+        if not self.isAuto:
             self.endTime+=15.0
 
         self.table.putNumber("TIME", self.endTime)
