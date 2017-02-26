@@ -11,12 +11,10 @@ Authored by the great Josh and Caleb programming team
 
 ###*Powered By The Following*:
 
- -Python 3 (the updated version of 2.7 , just thought I would add that for 2.7 users like me)  
+ -Python 3 and RobotPy
 
  -Bugs
 
- -Unintended Features (see item 2, Bugs.)  
-
- -Bad ideas (always need to include a few of these)  
+ -Unintended Features (see item 2, Bugs.) 
 
  -Print Statement Debugging (using words such as the ever popular, "Hi" , "Yo", and "I'm here bro")  
