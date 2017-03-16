@@ -48,7 +48,7 @@ class DriveForward(StatefulAutonomous):
         self.gearPiston.set(False)
         self.drive.mecanumMove(0,0,0,0)
 
-    @timed_state(duration=1.05, next_state='findPeg')
+    @timed_state(duration=.7, next_state='findPeg')
     def goForward(self):
         self.gearPiston.set(False)
         self.drive.turnLightOn()

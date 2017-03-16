@@ -53,10 +53,10 @@ class MyRobot(wpilib.IterativeRobot):
         """
         Buttons
         """
-        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 9) #X button
+        self.visionEnable = wpilib.buttons.JoystickButton(self.joystick, 7) #X button
         self.gearPistonButton = wpilib.buttons.JoystickButton(self.joystick, 5)
         self.safetyPistonButton = wpilib.buttons.JoystickButton(self.joystick, 3)
-        self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 10, period=0.5) #Controll switch init for auto lock direction
+        self.controlSwitch = button_debouncer.ButtonDebouncer(self.joystick, 8, period=0.5) #Controll switch init for auto lock direction
         self.driveControlButton = button_debouncer.ButtonDebouncer(self.joystick,1, period=0.5) #Mecanum to tank and the other way
         self.climbReverseButton = wpilib.buttons.JoystickButton(self.joystick,2)#Button for reverse out of climb
 
