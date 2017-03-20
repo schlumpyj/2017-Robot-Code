@@ -1,6 +1,6 @@
 # 2017-Robot-Code
 
-<img src="misc/control.png" width="50">
+<center><img src="misc/control.png" width="150"></center>
 
 2017 Robot Code using Python
 
