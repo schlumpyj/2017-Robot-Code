@@ -1,8 +1,17 @@
 <html>
+<head>
+<style>
+ img {
+     display: block;
+     margin: 0 auto;
+ }
+</style>
+</head>
+
 <body>
  <h1>2017-Robot-Code</h1>
 
- <center><img src="misc/control.png" width="150"></center>
+ <img src="misc/control.png" width="150">
 
 2017 Robot Code using Python
 
