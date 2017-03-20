@@ -1,6 +1,8 @@
-# 2017-Robot-Code
+<html>
+<body>
+ <h1>2017-Robot-Code</h1>
 
-<center><img src="misc/control.png" width="150"></center>
+ <center><img src="misc/control.png" width="150"></center>
 
 2017 Robot Code using Python
 
@@ -12,7 +14,7 @@ Autonomous = Place Gear, drop ten fuel off at low goal
 
 Authored by the great Josh and Caleb programming team
 
-###*Powered By The Following*:
+<h3><i>Powered By The Following</i></h3>:
 
  -Python 3 and RobotPy
 
@@ -21,3 +23,5 @@ Authored by the great Josh and Caleb programming team
  -Unintended Features (see item 2, Bugs.) 
 
  -Print Statement Debugging (using words such as the ever popular, "Hi" , "Yo", and "I'm here bro")  
+ </body>
+</html>
