@@ -3,7 +3,7 @@
 <body>
  <h1>2017-Robot-Code</h1>
 
- <div style="text-align:center">><img src="misc/control.png" width="150"></div>
+ <div style="display: block;margin: 0 auto;"><img src="misc/control.png" width="150"></div>
 
 2017 Robot Code using Python
 
