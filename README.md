@@ -1,6 +1,6 @@
 # 2017-Robot-Code
 
-![Screenshot] (/misc/control.png)
+![Screenshot] (misc/control.png)
 
 2017 Robot Code using Python
 
