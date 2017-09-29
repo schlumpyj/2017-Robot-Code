@@ -15,7 +15,7 @@ def main():
     cvSink = cs.getVideo()
 
     # (optional) Setup a CvSource. This will send images back to the Dashboard
-    outputStream = cs.putVideo("Rectangle", 320, 240)
+    outputStream = cs.putVideo("Rectangle", 160, 120)
 
     # Allocating new images is very expensive, always try to preallocate
     img = np.zeros(shape=(120, 160, 3), dtype=np.uint8)
@@ -29,9 +29,5 @@ def main():
             outputStream.notifyError(cvSink.getError());
             # skip the rest of the current iteration
             continue
-
-        # Put a rectangle on the image
-        #cv2.rectangle(img, (100, 100), (300, 300), (255, 255, 255), 5)
-
-        # Give the output stream a new image to display
+            
         outputStream.putFrame(img)
